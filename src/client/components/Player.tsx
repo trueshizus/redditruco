@@ -3,10 +3,11 @@ import { Card } from './Card';
 interface PlayerProps {
   id: string;
   cards: string[];
-  selectedCardId?: string | null;
-  flippedCardId?: string | null;
+  selectedCardId: string | undefined;
+  flippedCardId: string | undefined;
   onCardSelect: (cardId: string) => void;
   onCardToggleFlip: (cardId: string) => void;
+  isCurrentPlayer?: boolean;
 }
 
 export const Player = ({ 
@@ -15,12 +16,13 @@ export const Player = ({
   selectedCardId, 
   flippedCardId, 
   onCardSelect, 
-  onCardToggleFlip
+  onCardToggleFlip,
+  isCurrentPlayer = false
 }: PlayerProps) => {
   return (
-    <div className="bg-green-500">
+    <div className={`bg-green-500 ${isCurrentPlayer ? 'ring-2 ring-yellow-400' : ''}`}>
       <div className="bg-red-400 text-center my-2">
-        {id}
+        {id} {isCurrentPlayer ? '(Current Turn)' : ''}
       </div>
       <div className="flex justify-center items-center gap-4 p-4">
         {cards.map((cardId) => (
