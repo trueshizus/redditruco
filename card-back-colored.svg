@@ -1,0 +1,86 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="102.4" height="153.6" viewBox="0 0 1024 1536"
+ preserveAspectRatio="xMidYMid meet">
+
+<defs>
+  <style>
+    .card-border { fill: #D97706; stroke: #92400E; stroke-width: 8; }
+    .sky-background { fill: #3B82F6; }
+    .sun-rays { fill: #F59E0B; stroke: #D97706; stroke-width: 2; }
+    .sun-face { fill: #FCD34D; stroke: #D97706; stroke-width: 3; }
+    .cream-background { fill: #FEF3C7; }
+  </style>
+</defs>
+
+<!-- Cream background -->
+<rect class="cream-background" x="0" y="0" width="1024" height="1536"/>
+
+<!-- Sky background (center area) -->
+<rect class="sky-background" x="150" y="400" width="724" height="600" rx="20"/>
+
+<!-- Card border -->
+<rect class="card-border" x="50" y="50" width="924" height="1436" rx="40" ry="40" fill="none"/>
+
+<!-- Sun rays (simplified geometric version) -->
+<g class="sun-rays">
+  <!-- Long rays -->
+  <polygon points="512,300 520,200 504,200"/>
+  <polygon points="512,1200 520,1300 504,1300"/>
+  <polygon points="200,750 100,758 100,742"/>
+  <polygon points="824,750 924,758 924,742"/>
+  
+  <!-- Diagonal rays -->
+  <polygon points="312,450 250,350 270,340"/>
+  <polygon points="712,450 774,350 754,340"/>
+  <polygon points="312,1050 250,1150 270,1160"/>
+  <polygon points="712,1050 774,1150 754,1160"/>
+  
+  <!-- Medium rays (8 additional) -->
+  <polygon points="412,350 400,250 420,250"/>
+  <polygon points="612,350 624,250 604,250"/>
+  <polygon points="412,1150 400,1250 420,1250"/>
+  <polygon points="612,1150 624,1250 604,1250"/>
+  <polygon points="250,550 150,562 150,538"/>
+  <polygon points="774,550 874,562 874,538"/>
+  <polygon points="250,950 150,962 150,938"/>
+  <polygon points="774,950 874,962 874,938"/>
+  
+  <!-- Short rays (16 additional) -->
+  <polygon points="362,400 350,320 370,320"/>
+  <polygon points="462,380 450,300 470,300"/>
+  <polygon points="562,380 574,300 554,300"/>
+  <polygon points="662,400 674,320 654,320"/>
+  <polygon points="362,1100 350,1180 370,1180"/>
+  <polygon points="462,1120 450,1200 470,1200"/>
+  <polygon points="562,1120 574,1200 554,1200"/>
+  <polygon points="662,1100 674,1180 654,1180"/>
+  <polygon points="300,500 220,512 220,488"/>
+  <polygon points="280,600 200,612 200,588"/>
+  <polygon points="280,900 200,912 200,888"/>
+  <polygon points="300,1000 220,1012 220,988"/>
+  <polygon points="724,500 804,512 804,488"/>
+  <polygon points="744,600 824,612 824,588"/>
+  <polygon points="744,900 824,912 824,888"/>
+  <polygon points="724,1000 804,1012 804,988"/>
+</g>
+
+<!-- Sun face -->
+<g class="sun-face">
+  <!-- Main circle -->
+  <circle cx="512" cy="750" r="180"/>
+  
+  <!-- Eyes -->
+  <circle cx="470" cy="720" r="15" fill="#D97706"/>
+  <circle cx="554" cy="720" r="15" fill="#D97706"/>
+  
+  <!-- Nose -->
+  <path d="M 512,750 L 520,770 L 504,770 Z" fill="#D97706"/>
+  
+  <!-- Mouth -->
+  <path d="M 480,790 Q 512,810 544,790" stroke="#D97706" stroke-width="4" fill="none"/>
+</g>
+
+</svg>
