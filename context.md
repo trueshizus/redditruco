@@ -26,19 +26,27 @@ mcp__playwright__browser_navigate: https://www.reddit.com/r/reditruco_dev/?playt
 - Click to accept cookies
 
 ### 3. Access the App
-- Look for the "reditruco" post in the feed
-- Find the blue "Launch App" button within the post
-- Click "Launch App" to open the UI simulator
+- Scroll down to find the "reditruco" post in the feed (marked with green "APP" tag)
+- Look for the blue "Launch App" button within the post content area
+- Click "Launch App" to open the UI simulator dialog
 
-### 4. Dismiss Initial Dialog
-- Click "Got it" button to dismiss the device preview help dialog
+### 4. Dismiss Initial Dialog (if appears)
+- If device preview help appears, click "Got it" button to dismiss
+
+### 5. Development Workflow
+- Make changes to `src/client/App.tsx` (or other source files)
+- Changes auto-build via `npm run dev` running in VS Code
+- Refresh Reddit page (`mcp__playwright__browser_navigate` to same URL)
+- Click "Launch App" again to see updated version
+- App version increments automatically (e.g., 0.0.1.3 → 0.0.1.5)
 
 ## Expected Result
 The Devvit app will load in an iframe within a dialog showing:
 - Greeting: "Hey Shizus 👋"
-- Instructions to edit `src/client/App.tsx`
-- A counter with +/- buttons
+- Welcome message: "Welcome to Reddit Truco! Let's play some cards."
+- A counter with red +/- buttons (current value: 2)
 - Footer with Docs, r/Devvit, and Discord links
+- UI simulator controls (Mobile/Desktop/Fullscreen toggle)
 
 ## Tech Stack
 - **Frontend**: React 19.1.0, TailwindCSS 4.1.6, Vite 6.2.4
