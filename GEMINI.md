@@ -9,12 +9,14 @@ Reddit Truco is a web application that allows users to play the Argentinian card
 ## Tech Stack
 
 - **Frontend:**
+
   - React 19
   - Vite
   - Tailwind CSS
   - XState for state management
 
 - **Backend:**
+
   - Node.js with Express
   - Devvit (Reddit's app platform)
   - Redis for data storage

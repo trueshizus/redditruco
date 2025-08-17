@@ -10,7 +10,7 @@ const suits = [
   { code: 'E', name: 'Espadas', color: '#2c3e50' },
   { code: 'B', name: 'Bastos', color: '#8b4513' },
   { code: 'C', name: 'Copas', color: '#e74c3c' },
-  { code: 'O', name: 'Oros', color: '#f39c12' }
+  { code: 'O', name: 'Oros', color: '#f39c12' },
 ];
 
 const numbers = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
@@ -18,18 +18,18 @@ const numbers = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
 const numberNames = {
   1: 'As',
   2: 'Dos',
-  3: 'Tres', 
+  3: 'Tres',
   4: 'Cuatro',
   5: 'Cinco',
   6: 'Seis',
   7: 'Siete',
   10: 'Sota',
   11: 'Caballo',
-  12: 'Rey'
+  12: 'Rey',
 };
 
 function generateCardSVG(suit, number) {
-  const suitName = suits.find(s => s.code === suit.code).name;
+  const suitName = suits.find((s) => s.code === suit.code).name;
   const cardName = numberNames[number];
   const fullName = `${cardName} de ${suitName}`;
   const cardId = `${number.toString().padStart(2, '0')}_${suit.code}`;
@@ -95,7 +95,7 @@ function generateCardSVG(suit, number) {
 </svg>`;
 }
 
-// Create cards directory  
+// Create cards directory
 const cardsDir = path.join(__dirname, '..', 'src', 'client', 'public', 'cards');
 if (!fs.existsSync(cardsDir)) {
   fs.mkdirSync(cardsDir, { recursive: true });
@@ -103,12 +103,12 @@ if (!fs.existsSync(cardsDir)) {
 
 // Generate all cards
 let count = 0;
-suits.forEach(suit => {
-  numbers.forEach(number => {
+suits.forEach((suit) => {
+  numbers.forEach((number) => {
     const filename = `${number.toString().padStart(2, '0')}_${suit.code}.svg`;
     const svgContent = generateCardSVG(suit, number);
     const filepath = path.join(cardsDir, filename);
-    
+
     fs.writeFileSync(filepath, svgContent);
     count++;
     console.log(`Generated: ${filename}`);

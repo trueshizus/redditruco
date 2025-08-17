@@ -10,16 +10,17 @@ interface CardProps {
 
 export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: CardProps) => {
   const cardPath = `/cards/${id}`;
-  
+
   const getCardClass = () => {
-    let baseClass = "w-24 h-36 transition-all duration-300 cursor-pointer rounded-lg shadow-lg hover:shadow-xl";
-    
+    let baseClass =
+      'w-24 h-36 transition-all duration-300 cursor-pointer rounded-lg shadow-lg hover:shadow-xl';
+
     if (isSelected) {
-      baseClass += " ring-4 ring-yellow-400 transform scale-110 shadow-yellow-400/50";
+      baseClass += ' ring-4 ring-yellow-400 transform scale-110 shadow-yellow-400/50';
     } else {
-      baseClass += " hover:scale-105";
+      baseClass += ' hover:scale-105';
     }
-    
+
     return baseClass;
   };
 
@@ -39,10 +40,10 @@ export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: Card
         radial-gradient(50% 50%, var(--_g)),
         radial-gradient(50% 50%, var(--_g)) calc(var(--s)/2) calc(var(--s)/2) var(--c1)
       `,
-      backgroundSize: 'var(--s) var(--s)'
+      backgroundSize: 'var(--s) var(--s)',
     } as React.CSSProperties;
   };
-  
+
   const handleClick = () => {
     if (isSelected) {
       onToggleFlip();
@@ -50,24 +51,20 @@ export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: Card
       onSelect();
     }
   };
-  
+
   const getCardState = () => {
     if (isFlipped && isSelected) return 'active & back';
     if (isFlipped) return 'back';
     if (isSelected) return 'active';
     return 'idle';
   };
-  
+
   return (
     <div className="flex flex-col items-center">
       {isFlipped ? (
-        <div 
-          className={getCardClass()}
-          style={getCardBackStyle()}
-          onClick={handleClick}
-        />
+        <div className={getCardClass()} style={getCardBackStyle()} onClick={handleClick} />
       ) : (
-        <img 
+        <img
           className={`${getCardClass()} object-cover`}
           src={cardPath}
           alt={`Card ${id}`}
@@ -76,9 +73,7 @@ export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: Card
       )}
       {/* Optional debug info - can be removed for production */}
       {import.meta.env.DEV && (
-        <div className="text-center mt-1 text-xs text-gray-400">
-          {getCardState()}
-        </div>
+        <div className="text-center mt-1 text-xs text-gray-400">{getCardState()}</div>
       )}
     </div>
   );
