@@ -42,10 +42,9 @@ mcp__playwright__browser_navigate: https://www.reddit.com/r/reditruco_dev/?playt
 
 ## Expected Result
 The Devvit app will load in an iframe within a dialog showing:
-- Greeting: "Hey Shizus 👋"
-- Welcome message: "Welcome to Reddit Truco! Let's play some cards."
-- A counter with red +/- buttons (current value: 2)
-- Footer with Docs, r/Devvit, and Discord links
+- Single Spanish playing card (As de Bastos) with XState integration
+- Card displays current state (idle/selected/flipped) below
+- Interactive card that responds to clicks with state transitions
 - UI simulator controls (Mobile/Desktop/Fullscreen toggle)
 
 ## Tech Stack
@@ -54,32 +53,47 @@ The Devvit app will load in an iframe within a dialog showing:
 - **Database**: Redis (via Devvit)
 - **Testing**: Playwright 1.54.2
 - **Language**: TypeScript 5.8.2
-- **State Management**: React useState (XState planned)
+- **State Management**: XState 5.20.2 with @xstate/react 6.0.0
 
 ## Project Structure
 ```
 src/
-├── client/          # React frontend
-│   ├── App.tsx      # Main app component
-│   ├── hooks/       # React hooks
-│   └── public/      # Static assets
-├── server/          # Express backend
-│   ├── index.ts     # API routes
-│   └── core/        # Business logic
-└── shared/          # Shared types
-    └── types/       # API interfaces
+├── client/               # React frontend
+│   ├── App.tsx          # Main app component (displays single card)
+│   ├── components/      # React components
+│   │   └── Card.tsx     # Parametrized card component with XState
+│   ├── machines/        # XState state machines
+│   │   └── cardMachine.ts # Card state machine (idle/selected/flipped)
+│   ├── hooks/           # React hooks
+│   └── public/          # Static assets served by Devvit
+│       └── cards/       # Spanish deck SVG assets (40 cards + back)
+├── server/              # Express backend
+│   ├── index.ts         # API routes
+│   └── core/            # Business logic
+├── shared/              # Shared types
+│   └── types/           # API interfaces
+└── utils/               # Build tools
+    └── generate-svg-cards.js # CLI tool for generating card assets
 ```
 
 ## Current Implementation
-- Simple counter app with +/- buttons
-- User authentication via Reddit
-- Redis persistence for counter state
-- Express API with init/increment/decrement endpoints
-- Post creation functionality
+- Spanish deck card game foundation (40 cards: 1-7, 10-12 for E/B/C/O suits)
+- XState-powered card component with visual state feedback
+- SVG card assets with Argentine-inspired design and card back
+- Interactive card flipping functionality
+- CLI card generation system
+
+## Card Assets
+- **Naming**: `NN_S.svg` format (e.g., `01_B.svg` for As de Bastos)
+- **Location**: `src/client/public/cards/` (required for Devvit asset serving)
+- **Design**: Cream gradient background, suit-colored text, decorative elements
+- **Back Design**: Blue ornate pattern in `card-back.svg`
+- **Generation**: `npm run generate:cards` to regenerate all assets
 
 ## Development Commands
 - `npm run dev`: Start development with file watching
 - `npm run build`: Build client and server
 - `npm run deploy`: Upload new version
 - `npm run check`: Type check, lint, and format
+- `npm run generate:cards`: Generate Spanish deck SVG assets
 - `devvit playtest`: Local playtest command
