@@ -1,47 +1,50 @@
-import { useMachine } from '@xstate/react';
-import { cardMachine } from '../machines/cardMachine';
-
 interface CardProps {
   id: string;
+  isSelected: boolean;
+  isFlipped: boolean;
+  onSelect: () => void;
+  onToggleFlip: () => void;
 }
 
-export const Card = ({ id }: CardProps) => {
-  const [state, send] = useMachine(cardMachine);
+export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: CardProps) => {
   const cardPath = `/cards/${id}`;
   const cardBackPath = `/cards/card-back.svg`;
   
   const getCardClass = () => {
-    let baseClass = "w-24 h-36 object-contain transition-all duration-300 cursor-pointer";
+    let baseClass = "w-24 h-36 object-cover transition-all duration-300 cursor-pointer rounded-lg";
     
-    if (state.matches('selected')) {
-      baseClass += " ring-4 ring-blue-500 transform scale-105";
+    if (isSelected) {
+      baseClass += " ring-4 ring-blue-500 transform scale-110";
     }
     
     return baseClass;
   };
   
   const handleClick = () => {
-    if (state.matches('idle')) {
-      send({ type: 'SELECT' });
-    } else if (state.matches('selected')) {
-      send({ type: 'FLIP' });
-    } else if (state.matches('flipped')) {
-      send({ type: 'UNFLIP' });
+    if (isSelected) {
+      onToggleFlip();
+    } else {
+      onSelect();
     }
   };
   
-  const isFlipped = state.matches('flipped');
+  const getCardState = () => {
+    if (isFlipped && isSelected) return 'active & back';
+    if (isFlipped) return 'back';
+    if (isSelected) return 'active';
+    return 'idle';
+  };
   
   return (
-    <div className="inline-block">
+    <div className="grid grid-rows-3 place-items-center">
       <img 
+        className={`row-span-2 ${getCardClass()}`}
         src={isFlipped ? cardBackPath : cardPath}
         alt={isFlipped ? 'Card back' : `Card ${id}`}
-        className={getCardClass()}
         onClick={handleClick}
       />
-      <div className="text-center mt-2 text-sm text-gray-600">
-        State: {String(state.value)}
+      <div className="text-center mt-2 text-sm text-gray-600 row-span-1">
+        State: {getCardState()}
       </div>
     </div>
   );
