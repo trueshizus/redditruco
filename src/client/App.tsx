@@ -18,8 +18,8 @@ export const App = () => {
   };
   
   return (
-    <main className="min-h-screen grid grid-rows-3">
-      {/* Top Player */}
+    <main className="min-h-screen grid grid-rows-3 bg-gradient-to-b from-slate-800 to-slate-900">
+      {/* Top Player - Opponent */}
       <Player 
         id="shizus"
         cards={user2Cards}
@@ -32,7 +32,7 @@ export const App = () => {
       {/* Middle Board - this will grow */}
       <Board />
       
-      {/* Bottom Player */}
+      {/* Bottom Player - You */}
       <Player 
         id="Darkening"
         cards={user1Cards}

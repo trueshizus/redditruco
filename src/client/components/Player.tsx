@@ -15,12 +15,14 @@ export const Player = ({
   selectedCardId, 
   flippedCardId, 
   onCardSelect, 
-  onCardToggleFlip 
+  onCardToggleFlip
 }: PlayerProps) => {
   return (
-    <div className="flex justify-center items-center gap-4 p-4">
-      <div className="text-sm text-gray-600 mr-4">{id}</div>
-      <div className="flex gap-2">
+    <div className="bg-green-500">
+      <div className="bg-red-400 text-center my-2">
+        {id}
+      </div>
+      <div className="flex justify-center items-center gap-4 p-4">
         {cards.map((cardId) => (
           <Card
             key={cardId}
