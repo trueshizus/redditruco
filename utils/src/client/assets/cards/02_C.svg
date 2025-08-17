@@ -1,0 +1,21 @@
+<svg width="120" height="180" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card background -->
+  <rect x="5" y="5" width="110" height="170" rx="8" ry="8" 
+        fill="white" stroke="#333" stroke-width="2"/>
+  
+  <!-- Card number/rank -->
+  <text x="60" y="50" text-anchor="middle" font-family="Arial, sans-serif" 
+        font-size="28" font-weight="bold" fill="#e74c3c">2</text>
+  
+  <!-- Card suit name -->
+  <text x="60" y="85" text-anchor="middle" font-family="Arial, sans-serif" 
+        font-size="14" fill="#e74c3c">Copas</text>
+        
+  <!-- Card full name -->
+  <text x="60" y="120" text-anchor="middle" font-family="Arial, sans-serif" 
+        font-size="12" fill="#666">Dos de Copas</text>
+        
+  <!-- Card ID -->
+  <text x="60" y="150" text-anchor="middle" font-family="Arial, sans-serif" 
+        font-size="10" fill="#999">02_C</text>
+</svg>
