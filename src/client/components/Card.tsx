@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface CardProps {
   id: string;
   isSelected: boolean;
@@ -73,7 +75,7 @@ export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: Card
         />
       )}
       {/* Optional debug info - can be removed for production */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <div className="text-center mt-1 text-xs text-gray-400">
           {getCardState()}
         </div>
