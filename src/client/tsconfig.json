@@ -12,7 +12,8 @@
     // React
     "jsx": "react-jsx",
 
-    "tsBuildInfoFile": "../../dist/client/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "../../dist/client/tsconfig.tsbuildinfo",
+    "types": ["vite/client"]
   },
   // https://github.com/Microsoft/TypeScript/issues/25636
   "include": ["**/*", "**/*.json"],
