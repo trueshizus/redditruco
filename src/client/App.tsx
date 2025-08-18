@@ -1,10 +1,12 @@
 import { useMachine } from '@xstate/react';
 import { Player } from './components/Player';
 import { Board } from './components/Board';
-import { gameStateMachine } from './machines/gameStateMachine';
+import { gameStateMachine, gameActions } from './machines/gameStateMachine';
+import { useTranslation } from './hooks/useTranslation';
 
 export const App = () => {
   const [state, send] = useMachine(gameStateMachine);
+  const { t, language, setLanguage } = useTranslation();
 
   // Use cards from state machine context instead of hardcoded values
   const user1Cards = state.context.cards[0];
@@ -43,19 +45,15 @@ export const App = () => {
   const handleNoQuiero = () => send({ type: 'NO_QUIERO' });
   const handleMazo = () => send({ type: 'MAZO' });
 
-  // Determine button availability
-  const canCallEnvido =
-    state.value === 'playing' &&
-    state.context.currentTrick === 0 &&
-    !state.context.tricks[0].player1Card &&
-    !state.context.tricks[0].player2Card &&
-    state.context.currentBet === 'none';
-
-  const canCallTruco = state.value === 'playing' && state.context.currentBet === 'none';
-
-  const canRespond =
-    (state.value === 'envido_betting' || state.value === 'truco_betting') &&
-    state.context.awaitingResponse;
+  // Use helper functions to determine button availability
+  const canCallEnvido = gameActions.canCallEnvido(state.context);
+  const canCallTruco = gameActions.canCallTruco(state.context);
+  const canCallRetruco = gameActions.canCallRetruco(state.context);
+  const canCallValeCuatro = gameActions.canCallValeCuatro(state.context);
+  
+  // Check if players can respond to bets
+  const canPlayer1Respond = gameActions.canRespond(state.context, 0);
+  const canPlayer2Respond = gameActions.canRespond(state.context, 1);
 
   return (
     <main className="min-h-screen grid grid-rows-3 bg-gradient-to-b from-slate-800 to-slate-900">
@@ -89,31 +87,45 @@ export const App = () => {
         tricks={state.context.tricks}
       >
         <div className="text-center space-y-2">
+          {/* Language Switcher */}
+          <div className="flex justify-center gap-2 mb-2">
+            <button 
+              onClick={() => setLanguage('en')}
+              className={`px-2 py-1 text-xs rounded ${language === 'en' ? 'bg-yellow-600 text-white' : 'bg-yellow-200 text-black'}`}
+            >
+              EN
+            </button>
+            <button 
+              onClick={() => setLanguage('es')}
+              className={`px-2 py-1 text-xs rounded ${language === 'es' ? 'bg-yellow-600 text-white' : 'bg-yellow-200 text-black'}`}
+            >
+              ES
+            </button>
+          </div>
           <div className="text-xs text-yellow-400 font-mono">
-            Match ID: {state.context.matchId}
+            {t.game.info.matchId}: {state.context.matchId}
           </div>
           <div>Game State: {String(state.value)}</div>
           <div>
-            Current Turn: {state.context.players[state.context.currentTurn]?.name || 'Unknown'}
+            {t.game.info.currentTurn}: {state.context.players[state.context.currentTurn]?.name || 'Unknown'}
           </div>
           <div>
-            Score: {state.context.score[0]} - {state.context.score[1]}
+            {t.game.info.score}: {state.context.score[0]} - {state.context.score[1]}
           </div>
           <div className="text-sm text-yellow-200">
-            Dealer: {state.context.players[state.context.dealer]?.name} | Mano:{' '}
+            {t.game.info.dealer}: {state.context.players[state.context.dealer]?.name} | {t.game.info.mano}:{' '}
             {state.context.players[state.context.mano]?.name}
           </div>
           <div className="text-xs text-yellow-300">
-            Cards dealt: {state.context.cards[0].length + state.context.cards[1].length}/6
+            {t.game.info.cardsDealt(state.context.cards[0].length + state.context.cards[1].length, 6)}
           </div>
           {state.context.currentBet !== 'none' && (
             <div className="text-sm text-orange-200 bg-orange-900/50 px-2 py-1 rounded">
-              {state.context.players[state.context.betInitiator!]?.name} called:{' '}
-              {state.context.currentBet.replace('_', ' ').toUpperCase()}(
-              {state.context.currentBet.includes('envido')
-                ? state.context.betPoints
-                : state.context.handValue}{' '}
-              pts)
+              {t.betting.called(
+                state.context.players[state.context.betInitiator!]?.name || '',
+                state.context.currentBet,
+                state.context.currentBet.includes('envido') ? state.context.betPoints : state.context.handValue
+              )}
             </div>
           )}
           {state.context.selectedCardId && state.value === 'playing' && (
@@ -121,7 +133,7 @@ export const App = () => {
               onClick={handlePlayCard}
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             >
-              Play Selected Card
+              {t.actions.buttons.playCard}
             </button>
           )}
           {state.value === 'idle' && (
@@ -129,33 +141,33 @@ export const App = () => {
               onClick={handleStartGame}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              Start Game & Deal Cards
+              {t.actions.buttons.startGame}
             </button>
           )}
           {state.value === 'hand_complete' && (
             <div className="space-y-2">
               <div className="text-lg font-bold text-yellow-300">
-                Hand Winner: {state.context.players[state.context.handWinner!]?.name}
+                {t.betting.handWinner(state.context.players[state.context.handWinner!]?.name || '')}
               </div>
               <button
                 onClick={handleStartNewHand}
                 className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
               >
-                Start New Hand
+                {t.actions.buttons.startNewHand}
               </button>
             </div>
           )}
           {state.value === 'finished' && (
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-yellow-300">🏆 GAME OVER! 🏆</div>
+              <div className="text-2xl font-bold text-yellow-300">{t.game.winner.gameOver}</div>
               <div className="text-lg text-yellow-200">
-                Winner:{' '}
+                {t.game.winner.winner}:{' '}
                 {state.context.score[0] >= 30
                   ? state.context.players[0]?.name
                   : state.context.players[1]?.name}
               </div>
               <div className="text-sm text-yellow-300">
-                Final Score: {state.context.score[0]} - {state.context.score[1]}
+                {t.game.winner.finalScore}: {state.context.score[0]} - {state.context.score[1]}
               </div>
             </div>
           )}

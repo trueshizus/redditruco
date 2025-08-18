@@ -1,4 +1,5 @@
 import { Card } from './Card';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface PlayerProps {
   id: string;
@@ -43,15 +44,17 @@ export const Player = ({
   canCallTruco = false,
   canRespond = false,
 }: PlayerProps) => {
+  const { t } = useTranslation();
+  
   return (
     <div className={`bg-green-500 ${isCurrentPlayer ? 'ring-2 ring-yellow-400' : ''}`}>
       <div className="bg-red-400 text-center my-2">
-        {id} {isCurrentPlayer ? '(Current Turn)' : ''} - Cards: {cards.length}
+        {id} {isCurrentPlayer ? t.player.currentTurn : ''} - {t.player.cards(cards.length)}
       </div>
       {/* Cards Section */}
       <div className="flex justify-center items-center gap-4 p-4 min-h-[120px]">
         {cards.length === 0 ? (
-          <div className="text-gray-300 text-sm italic">No cards dealt</div>
+          <div className="text-gray-300 text-sm italic">{t.player.noCards}</div>
         ) : (
           cards.map((cardId) => (
             <Card
@@ -76,19 +79,19 @@ export const Player = ({
                 onClick={onEnvido}
                 className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
               >
-                Envido
+                {t.actions.buttons.envido}
               </button>
               <button
                 onClick={onRealEnvido}
                 className="px-3 py-1 bg-blue-700 text-white text-sm rounded hover:bg-blue-800"
               >
-                Real Envido
+                {t.actions.buttons.realEnvido}
               </button>
               <button
                 onClick={onFaltaEnvido}
                 className="px-3 py-1 bg-blue-800 text-white text-sm rounded hover:bg-blue-900"
               >
-                Falta Envido
+                {t.actions.buttons.faltaEnvido}
               </button>
             </div>
           )}
@@ -100,19 +103,19 @@ export const Player = ({
                 onClick={onTruco}
                 className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
               >
-                Truco
+                {t.actions.buttons.truco}
               </button>
               <button
                 onClick={onRetruco}
                 className="px-3 py-1 bg-red-700 text-white text-sm rounded hover:bg-red-800"
               >
-                Retruco
+                {t.actions.buttons.retruco}
               </button>
               <button
                 onClick={onValeCuatro}
                 className="px-3 py-1 bg-red-800 text-white text-sm rounded hover:bg-red-900"
               >
-                Vale Cuatro
+                {t.actions.buttons.valeCuatro}
               </button>
             </div>
           )}
@@ -124,13 +127,13 @@ export const Player = ({
                 onClick={onQuiero}
                 className="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
               >
-                Quiero
+                {t.actions.buttons.quiero}
               </button>
               <button
                 onClick={onNoQuiero}
                 className="px-4 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
               >
-                No Quiero
+                {t.actions.buttons.noQuiero}
               </button>
             </div>
           )}
@@ -142,7 +145,7 @@ export const Player = ({
                 onClick={onMazo}
                 className="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"
               >
-                Mazo
+                {t.actions.buttons.mazo}
               </button>
             </div>
           )}

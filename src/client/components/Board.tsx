@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Trick {
   player1Card: string | null;
@@ -14,6 +15,7 @@ interface BoardProps {
 }
 
 export const Board = ({ children, currentTrick, trickNumber, tricks }: BoardProps) => {
+  const { t } = useTranslation();
   return (
     <div className="flex-1 flex flex-col justify-center items-center bg-gradient-to-br from-green-700 to-green-800 border-4 border-yellow-600 rounded-xl m-6 shadow-2xl relative overflow-hidden">
       {/* Felt texture overlay */}
@@ -21,10 +23,10 @@ export const Board = ({ children, currentTrick, trickNumber, tricks }: BoardProp
 
       {/* Game area */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full">
-        <div className="text-center text-yellow-100 font-bold text-xl mb-4">TRUCO</div>
+        <div className="text-center text-yellow-100 font-bold text-xl mb-4">{t.board.title}</div>
 
         {/* Trick status */}
-        <div className="text-center text-yellow-100 text-sm mb-2">Trick {trickNumber + 1}/3</div>
+        <div className="text-center text-yellow-100 text-sm mb-2">{t.board.trickStatus(trickNumber + 1)}</div>
 
         {/* Card play areas */}
         <div className="flex gap-8 mb-4">
@@ -36,7 +38,7 @@ export const Board = ({ children, currentTrick, trickNumber, tricks }: BoardProp
                 className="w-full h-full object-contain"
               />
             ) : (
-              <span className="text-yellow-300/70 text-xs">Player 1</span>
+              <span className="text-yellow-300/70 text-xs">{t.board.playAreas.player1}</span>
             )}
           </div>
           <div className="w-20 h-28 border-2 border-dashed border-yellow-400/50 rounded-lg flex items-center justify-center">
@@ -47,7 +49,7 @@ export const Board = ({ children, currentTrick, trickNumber, tricks }: BoardProp
                 className="w-full h-full object-contain"
               />
             ) : (
-              <span className="text-yellow-300/70 text-xs">Player 2</span>
+              <span className="text-yellow-300/70 text-xs">{t.board.playAreas.player2}</span>
             )}
           </div>
         </div>
@@ -70,7 +72,7 @@ export const Board = ({ children, currentTrick, trickNumber, tricks }: BoardProp
           ))}
         </div>
 
-        <div className="text-yellow-200/80 text-sm">{children || 'Select and play your cards'}</div>
+        <div className="text-yellow-200/80 text-sm">{children || t.board.description}</div>
       </div>
     </div>
   );
