@@ -220,6 +220,57 @@ function calculateEnvidoPoints(cards: string[]): number {
   return maxPoints;
 }
 
+// Validation functions for game actions
+function canCallEnvido(context: GameContext): boolean {
+  return (
+    context.gameState === 'playing' && 
+    context.currentTrick === 0 &&
+    !context.tricks[0].player1Card &&
+    !context.tricks[0].player2Card &&
+    context.currentBet === 'none'
+  );
+}
+
+function canCallTruco(context: GameContext): boolean {
+  return (
+    context.gameState === 'playing' && 
+    context.currentBet !== 'truco' && 
+    context.currentBet !== 'retruco' && 
+    context.currentBet !== 'vale_cuatro'
+  );
+}
+
+function canCallRetruco(context: GameContext): boolean {
+  return (
+    context.gameState === 'truco_betting' && 
+    context.currentBet === 'truco'
+  );
+}
+
+function canCallValeCuatro(context: GameContext): boolean {
+  return (
+    context.gameState === 'truco_betting' && 
+    context.currentBet === 'retruco'
+  );
+}
+
+function canPlayCard(context: GameContext): boolean {
+  const playerCards = context.cards[context.currentTurn] || [];
+  return (
+    context.gameState === 'playing' && 
+    context.selectedCardId !== undefined && 
+    playerCards.includes(context.selectedCardId)
+  );
+}
+
+function canRespond(context: GameContext, playerIndex: number): boolean {
+  return (
+    (context.gameState === 'envido_betting' || context.gameState === 'truco_betting') &&
+    context.awaitingResponse && 
+    context.betInitiator !== playerIndex
+  );
+}
+
 interface Trick {
   player1Card: string | null;
   player2Card: string | null;
@@ -261,6 +312,16 @@ interface GameContext {
   awaitingResponse: boolean; // Waiting for bet response
   handValue: number; // Base hand value (1 point, multiplied by truco)
 }
+
+// Export game action helpers for UI use
+export const gameActions = {
+  canCallEnvido,
+  canCallTruco,
+  canCallRetruco,
+  canCallValeCuatro,
+  canPlayCard,
+  canRespond,
+};
 
 export const gameStateMachine = createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5gF8A0IB2B7CdGigEMBbMAZQBdCKx8QAHLWASwuawzoA9EBaANnQBPPv2RoQRUpWpgAdMwgAbWkgZNW7Tmp4IALACZhiABwBGOQFZx4oA */
@@ -348,6 +409,11 @@ export const gameStateMachine = createMachine({
           actions: assign({
             selectedCardId: ({ event }) => event.cardId,
           }),
+          // Only allow selecting cards from the current player's hand
+          guard: ({ context, event }) => {
+            const playerCards = context.cards[context.currentTurn] || [];
+            return playerCards.includes(event.cardId);
+          },
         },
         FLIP_CARD: {
           actions: assign(({ context, event }) => ({
@@ -358,6 +424,11 @@ export const gameStateMachine = createMachine({
                   : event.cardId
                 : context.flippedCardId,
           })),
+          // Only allow flipping cards that belong to the current player
+          guard: ({ context, event }) => {
+            const playerCards = context.cards[context.currentTurn] || [];
+            return playerCards.includes(event.cardId);
+          },
         },
         PLAY_CARD: {
           actions: assign(({ context }) => {
@@ -452,6 +523,12 @@ export const gameStateMachine = createMachine({
               handWinner: newHandWinner,
             };
           }),
+          // Make sure the player has a selected card that belongs to them
+          guard: ({ context }) => {
+            const playerCards = context.cards[context.currentTurn] || [];
+            return context.selectedCardId !== undefined && 
+                   playerCards.some(card => card === context.selectedCardId);
+          },
         },
         // Envido betting
         ENVIDO: {
@@ -467,11 +544,7 @@ export const gameStateMachine = createMachine({
             logGameState(context.matchId, 'envido_betting', { ...context, ...newContext }, 'ENVIDO');
             return newContext;
           }),
-          guard: ({ context }) =>
-            context.currentTrick === 0 &&
-            !context.tricks[0].player1Card &&
-            !context.tricks[0].player2Card &&
-            context.currentBet === 'none',
+          guard: ({ context }) => canCallEnvido(context),
         },
         REAL_ENVIDO: {
           target: 'envido_betting',
@@ -482,11 +555,7 @@ export const gameStateMachine = createMachine({
             awaitingResponse: true,
             gameState: 'envido_betting' as const,
           }),
-          guard: ({ context }) =>
-            context.currentTrick === 0 &&
-            !context.tricks[0].player1Card &&
-            !context.tricks[0].player2Card &&
-            context.currentBet === 'none',
+          guard: ({ context }) => canCallEnvido(context),
         },
         FALTA_ENVIDO: {
           target: 'envido_betting',
@@ -497,11 +566,7 @@ export const gameStateMachine = createMachine({
             awaitingResponse: true,
             gameState: 'envido_betting' as const,
           }),
-          guard: ({ context }) =>
-            context.currentTrick === 0 &&
-            !context.tricks[0].player1Card &&
-            !context.tricks[0].player2Card &&
-            context.currentBet === 'none',
+          guard: ({ context }) => canCallEnvido(context),
         },
         // Truco betting
         TRUCO: {
@@ -517,10 +582,22 @@ export const gameStateMachine = createMachine({
             logGameState(context.matchId, 'truco_betting', { ...context, ...newContext }, 'TRUCO');
             return newContext;
           }),
-          guard: ({ context }) => context.currentBet === 'none',
+          guard: ({ context }) => canCallTruco(context),
         },
         END_GAME: {
           target: 'finished',
+        },
+        // Add MAZO handler (player surrenders hand)
+        MAZO: {
+          target: 'hand_complete',
+          actions: assign(({ context }) => {
+            // The player who called MAZO surrenders
+            const opponent = context.currentTurn === 0 ? 1 : 0;
+            return {
+              handWinner: opponent,
+              gameState: 'hand_complete' as const,
+            };
+          }),
         },
       },
       always: [
@@ -563,6 +640,10 @@ export const gameStateMachine = createMachine({
             logGameState(context.matchId, 'playing', { ...context, ...newContext }, `QUIERO_ENVIDO_WINNER_${winner}_P1:${player1Points}_P2:${player2Points}`);
             return newContext;
           }),
+          // Only the responding player can accept
+          guard: ({ context }) => 
+            context.awaitingResponse && 
+            context.betInitiator !== context.currentTurn,
         },
         NO_QUIERO: {
           target: 'playing',
@@ -577,6 +658,10 @@ export const gameStateMachine = createMachine({
             awaitingResponse: false,
             gameState: 'playing' as const,
           })),
+          // Only the responding player can decline
+          guard: ({ context }) => 
+            context.awaitingResponse && 
+            context.betInitiator !== context.currentTurn,
         },
       },
     },
@@ -594,6 +679,10 @@ export const gameStateMachine = createMachine({
             awaitingResponse: false,
             gameState: 'playing' as const,
           }),
+          // Only the responding player can accept
+          guard: ({ context }) => 
+            context.awaitingResponse && 
+            context.betInitiator !== context.currentTurn,
         },
         NO_QUIERO: {
           target: 'hand_complete',
@@ -609,20 +698,30 @@ export const gameStateMachine = createMachine({
             awaitingResponse: false,
             gameState: 'hand_complete' as const,
           })),
+          // Only the responding player can decline
+          guard: ({ context }) => 
+            context.awaitingResponse && 
+            context.betInitiator !== context.currentTurn,
         },
         RETRUCO: {
           actions: assign({
             currentBet: 'retruco' as const,
             handValue: 3,
-            betInitiator: ({ context }) => (context.currentTurn === 0 ? 1 : 0), // Switch initiator
+            betInitiator: ({ context }) => context.currentTurn,
+            awaitingResponse: true,
           }),
+          // Can only call retruco if the current bet is truco and it's the opponent's turn
+          guard: ({ context }) => canCallRetruco(context) && context.betInitiator !== context.currentTurn,
         },
         VALE_CUATRO: {
           actions: assign({
             currentBet: 'vale_cuatro' as const,
             handValue: 4,
-            betInitiator: ({ context }) => (context.currentTurn === 0 ? 1 : 0), // Switch initiator
+            betInitiator: ({ context }) => context.currentTurn,
+            awaitingResponse: true,
           }),
+          // Can only call vale cuatro if the current bet is retruco and it's the opponent's turn
+          guard: ({ context }) => canCallValeCuatro(context) && context.betInitiator !== context.currentTurn,
         },
       },
     },
