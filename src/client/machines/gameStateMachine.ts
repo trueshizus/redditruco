@@ -227,7 +227,8 @@ function canCallEnvido(context: GameContext): boolean {
     context.currentTrick === 0 &&
     !context.tricks[0].player1Card &&
     !context.tricks[0].player2Card &&
-    context.currentBet === 'none'
+    context.currentBet === 'none' &&
+    !context.trucoCalledThisRound  // Prevent Envido after Truco
   );
 }
 
@@ -311,6 +312,7 @@ interface GameContext {
   betInitiator: number | null; // Who started the current bet
   awaitingResponse: boolean; // Waiting for bet response
   handValue: number; // Base hand value (1 point, multiplied by truco)
+  trucoCalledThisRound: boolean; // Track if Truco was called in this round
 }
 
 // Export game action helpers for UI use
@@ -350,6 +352,7 @@ export const gameStateMachine = createMachine({
     betInitiator: null,
     awaitingResponse: false,
     handValue: 1, // Base hand value
+    trucoCalledThisRound: false,
   } as GameContext,
   states: {
     idle: {
@@ -578,6 +581,7 @@ export const gameStateMachine = createMachine({
               betInitiator: context.currentTurn,
               awaitingResponse: true,
               gameState: 'truco_betting' as const,
+              trucoCalledThisRound: true,  // Mark that Truco was called
             };
             logGameState(context.matchId, 'truco_betting', { ...context, ...newContext }, 'TRUCO');
             return newContext;
@@ -754,6 +758,7 @@ export const gameStateMachine = createMachine({
             betInitiator: null,
             awaitingResponse: false,
             handValue: 1,
+            trucoCalledThisRound: false,  // Reset Truco flag for new round
             // Rotate dealer and mano
             dealer: context.dealer === 0 ? 1 : 0,
             mano: context.mano === 0 ? 1 : 0,
@@ -798,6 +803,7 @@ export const gameStateMachine = createMachine({
               betInitiator: null,
               awaitingResponse: false,
               handValue: 1,
+              trucoCalledThisRound: false,
             };
             logGameState(context.matchId, 'restarting', context, 'RESTART_GAME');
             logGameState(newMatchId, 'idle', newContext, 'NEW_GAME_STARTED');
