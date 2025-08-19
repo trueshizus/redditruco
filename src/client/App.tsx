@@ -91,12 +91,15 @@ export const App = () => {
           canCallEnvido={state.context.currentTurn === 1 && canCallEnvidoValidation}
           canCallTruco={state.context.currentTurn === 1 && canCallTruco}
           canCallMazo={state.context.currentTurn === 1 && canCallMazo}
+          canRespond={canRespond && state.context.betInitiator === 0}
           onPlayCard={(cardId) => send({ type: 'PLAY_CARD', cardId })}
           onCallEnvido={handleEnvido}
           onCallRealEnvido={handleRealEnvido}
           onCallFaltaEnvido={handleFaltaEnvido}
           onCallTruco={handleTruco}
           onCallMazo={handleMazo}
+          onQuiero={handleQuiero}
+          onNoQuiero={handleNoQuiero}
         />
       </section>
 

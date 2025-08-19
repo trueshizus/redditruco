@@ -7,12 +7,15 @@ interface OpponentDebugPanelProps {
   canCallEnvido: boolean;
   canCallTruco: boolean;
   canCallMazo: boolean;
+  canRespond: boolean;
   onPlayCard: (cardId: string) => void;
   onCallEnvido: () => void;
   onCallRealEnvido: () => void;
   onCallFaltaEnvido: () => void;
   onCallTruco: () => void;
   onCallMazo: () => void;
+  onQuiero: () => void;
+  onNoQuiero: () => void;
 }
 
 export const OpponentDebugPanel = ({ 
@@ -21,12 +24,15 @@ export const OpponentDebugPanel = ({
   canCallEnvido,
   canCallTruco,
   canCallMazo,
+  canRespond,
   onPlayCard,
   onCallEnvido,
   onCallRealEnvido,
   onCallFaltaEnvido,
   onCallTruco,
-  onCallMazo
+  onCallMazo,
+  onQuiero,
+  onNoQuiero
 }: OpponentDebugPanelProps) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const nodeRef = useRef(null);
@@ -114,6 +120,30 @@ export const OpponentDebugPanel = ({
                       className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
                       Falta
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Response Actions (Quiero/No Quiero) */}
+              {canRespond && (
+                <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                  <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
+                    <span className="text-base mr-2">⚡</span>
+                    Response
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={onQuiero}
+                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                    >
+                      ✓ Quiero
+                    </button>
+                    <button
+                      onClick={onNoQuiero}
+                      className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                    >
+                      ✗ No Quiero
                     </button>
                   </div>
                 </div>
