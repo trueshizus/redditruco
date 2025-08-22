@@ -8,6 +8,7 @@ interface OpponentDebugPanelProps {
   canCallTruco: boolean;
   canCallMazo: boolean;
   canRespond: boolean;
+  trucoState: 'none' | 'truco' | 'retruco' | 'vale_cuatro';
   onPlayCard: (cardId: string) => void;
   onCallEnvido: () => void;
   onCallRealEnvido: () => void;
@@ -16,6 +17,8 @@ interface OpponentDebugPanelProps {
   onCallMazo: () => void;
   onQuiero: () => void;
   onNoQuiero: () => void;
+  onRetruco: () => void;
+  onValeCuatro: () => void;
 }
 
 export const OpponentDebugPanel = ({ 
@@ -25,6 +28,7 @@ export const OpponentDebugPanel = ({
   canCallTruco,
   canCallMazo,
   canRespond,
+  trucoState,
   onPlayCard,
   onCallEnvido,
   onCallRealEnvido,
@@ -32,7 +36,9 @@ export const OpponentDebugPanel = ({
   onCallTruco,
   onCallMazo,
   onQuiero,
-  onNoQuiero
+  onNoQuiero,
+  onRetruco,
+  onValeCuatro
 }: OpponentDebugPanelProps) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const nodeRef = useRef(null);
@@ -125,26 +131,48 @@ export const OpponentDebugPanel = ({
                 </div>
               )}
               
-              {/* Response Actions (Quiero/No Quiero) */}
+              {/* Response Actions (Quiero/No Quiero/Escalation) */}
               {canRespond && (
                 <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
                   <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
                     <span className="text-base mr-2">⚡</span>
                     Response
                   </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={onQuiero}
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
-                    >
-                      ✓ Quiero
-                    </button>
-                    <button
-                      onClick={onNoQuiero}
-                      className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
-                    >
-                      ✗ No Quiero
-                    </button>
+                  <div className="space-y-2">
+                    {/* Accept/Reject Row */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={onQuiero}
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                      >
+                        ✓ Quiero
+                      </button>
+                      <button
+                        onClick={onNoQuiero}
+                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                      >
+                        ✗ No Quiero
+                      </button>
+                    </div>
+                    
+                    {/* Escalation Options */}
+                    {trucoState === 'truco' && (
+                      <button
+                        onClick={onRetruco}
+                        className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                      >
+                        🎯 Quiero Re-Truco
+                      </button>
+                    )}
+                    
+                    {trucoState === 'retruco' && (
+                      <button
+                        onClick={onValeCuatro}
+                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
+                      >
+                        🎯 Quiero Vale Cuatro
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
