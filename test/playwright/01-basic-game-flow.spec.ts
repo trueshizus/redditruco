@@ -112,6 +112,41 @@ test.describe('01 basic game flow — UI ↔ state machine', () => {
     await expect(page.locator('[data-testid="action-NEXT_ROUND"]')).toBeVisible();
   });
 
+  test('envido está primero: responder interrupts truco with envido', async ({ page }) => {
+    await action(page, 'START_GAME');
+    let s = await getSnapshot(page);
+    const trucoCaller = s.context.currentTurn;
+
+    await actAs(page, trucoCaller, 'CALL_TRUCO');
+    s = await getSnapshot(page);
+    expect(s.value).toBe('truco_betting');
+
+    // Responder answers with Envido — the state machine interrupts the truco.
+    const responder = trucoCaller === 0 ? 1 : 0;
+    await actAs(page, responder, 'CALL_ENVIDO');
+    s = await getSnapshot(page);
+    expect(s.value).toBe('envido_betting');
+    expect(s.context.trucoInterrupted).toBe(true);
+    expect(s.context.pendingTrucoInitiator).toBe(trucoCaller);
+    expect(s.context.trucoState).toBe('truco');
+
+    // The original truco caller now responds to the envido.
+    await actAs(page, trucoCaller, 'QUIERO');
+    s = await getSnapshot(page);
+    expect(s.value).toBe('truco_betting');
+    expect(s.context.trucoInterrupted).toBe(false);
+    expect(s.context.envidoCalled).toBe(true);
+    expect(s.context.betInitiator).toBe(trucoCaller); // truco is pending again
+    expect(s.context.awaitingResponse).toBe(true);
+
+    // Responder can now answer the truco.
+    await actAs(page, responder, 'QUIERO');
+    s = await getSnapshot(page);
+    expect(s.value).toBe('playing');
+    expect(s.context.roundStake).toBe(2);
+    expect(s.context.trucoHolder).toBe(responder);
+  });
+
   test('one full trick: first play stays in playing, second completes the trick', async ({ page }) => {
     await action(page, 'START_GAME');
     let s = await getSnapshot(page);

@@ -82,6 +82,12 @@ export interface GameContext {
   trucoCalledThisRound: boolean; // Once truco enters a round, envido is locked out
   trucoHolder: number | null; // Player who may raise truco next (accepter), null before first accept
 
+  // "Envido está primero": when envido interrupts a pending truco, we must
+  // restore truco_betting after the envido resolves. These fields preserve
+  // the truco call's context across the envido interlude.
+  trucoInterrupted: boolean;
+  pendingTrucoInitiator: number | null;
+
   // Game state
   gameState: TrucoState;
   betInitiator: number | null; // Who initiated the latest bet

@@ -45,6 +45,8 @@ function createInitialContext(seed?: string): GameContext {
     envidoState: 'none',
     trucoCalledThisRound: false,
     trucoHolder: null,
+    trucoInterrupted: false,
+    pendingTrucoInitiator: null,
     gameState: 'idle',
     betInitiator: null,
     awaitingResponse: false,
@@ -105,6 +107,22 @@ function mayInitiateTruco(ctx: GameContext): boolean {
     !ctx.awaitingResponse &&
     // Locked out of new truco only if a game-ending move is pending.
     ctx.roundWinner === null
+  );
+}
+
+// "Envido está primero": the responder to a truco may call envido instead,
+// provided we're still in trick 0, no card has hit the board, and envido
+// hasn't already been resolved.
+function canInterruptTrucoWithEnvido(ctx: GameContext): boolean {
+  return (
+    ctx.gameState === 'truco_betting' &&
+    ctx.awaitingResponse &&
+    ctx.board.currentTrick === 0 &&
+    ctx.board.cardsInPlay.player === null &&
+    ctx.board.cardsInPlay.adversary === null &&
+    ctx.tricks[0]!.player1Card === null &&
+    ctx.tricks[0]!.player2Card === null &&
+    !ctx.envidoCalled
   );
 }
 
@@ -176,6 +194,8 @@ export const trucoStateMachine = createMachine({
           envidoState: 'none' as EnvidoBet,
           trucoCalledThisRound: false,
           trucoHolder: null,
+          trucoInterrupted: false,
+          pendingTrucoInitiator: null,
           betInitiator: null,
           awaitingResponse: false,
           roundWinner: null,
@@ -472,47 +492,117 @@ export const trucoStateMachine = createMachine({
           }),
         },
 
-        QUIERO: {
-          target: 'playing',
-          guard: ({ context }) => context.awaitingResponse && context.betInitiator !== null,
-          actions: assign(({ context }) => {
-            const result = resolveEnvido(context.player.hand, context.adversary.hand, context.mano);
-            const scores = awardPoints(context, result.winner, context.envidoStake);
-            return {
-              ...scores,
-              envidoCalled: true,
-              envidoState: 'none' as EnvidoBet,
-              envidoStake: 0,
-              envidoAcceptedStake: 0,
-              betInitiator: null,
-              awaitingResponse: false,
-              logs: addLog(
-                context,
-                `Envido accepted. ${context.player.name}: ${result.player1Points} | ${context.adversary.name}: ${result.player2Points}. ${playerName({ ...context, ...scores }, result.winner)} wins ${context.envidoStake}.`,
-              ),
-            };
-          }),
-        },
+        QUIERO: [
+          {
+            // Envido accepted while a truco was interrupted: resolve envido,
+            // then return to truco_betting so the truco call still needs an answer.
+            target: 'truco_betting',
+            guard: ({ context }) =>
+              context.awaitingResponse && context.betInitiator !== null && context.trucoInterrupted,
+            actions: assign(({ context }) => {
+              const result = resolveEnvido(
+                context.player.hand,
+                context.adversary.hand,
+                context.mano,
+              );
+              const scores = awardPoints(context, result.winner, context.envidoStake);
+              return {
+                ...scores,
+                envidoCalled: true,
+                envidoState: 'none' as EnvidoBet,
+                envidoStake: 0,
+                envidoAcceptedStake: 0,
+                trucoInterrupted: false,
+                // Restore the truco call's initiator so the pending truco
+                // response is once again awaiting them.
+                betInitiator: context.pendingTrucoInitiator,
+                pendingTrucoInitiator: null,
+                awaitingResponse: true,
+                logs: addLog(
+                  context,
+                  `Envido accepted. ${context.player.name}: ${result.player1Points} | ${context.adversary.name}: ${result.player2Points}. ${playerName({ ...context, ...scores }, result.winner)} wins ${context.envidoStake}. Back to pending Truco.`,
+                ),
+              };
+            }),
+          },
+          {
+            target: 'playing',
+            guard: ({ context }) => context.awaitingResponse && context.betInitiator !== null,
+            actions: assign(({ context }) => {
+              const result = resolveEnvido(
+                context.player.hand,
+                context.adversary.hand,
+                context.mano,
+              );
+              const scores = awardPoints(context, result.winner, context.envidoStake);
+              return {
+                ...scores,
+                envidoCalled: true,
+                envidoState: 'none' as EnvidoBet,
+                envidoStake: 0,
+                envidoAcceptedStake: 0,
+                betInitiator: null,
+                awaitingResponse: false,
+                logs: addLog(
+                  context,
+                  `Envido accepted. ${context.player.name}: ${result.player1Points} | ${context.adversary.name}: ${result.player2Points}. ${playerName({ ...context, ...scores }, result.winner)} wins ${context.envidoStake}.`,
+                ),
+              };
+            }),
+          },
+        ],
 
-        NO_QUIERO: {
-          target: 'playing',
-          guard: ({ context }) => context.awaitingResponse && context.betInitiator !== null,
-          actions: assign(({ context }) => {
-            const initiator = context.betInitiator!;
-            const points = context.envidoAcceptedStake || 1;
-            const scores = awardPoints(context, initiator, points);
-            return {
-              ...scores,
-              envidoCalled: true,
-              envidoState: 'none' as EnvidoBet,
-              envidoStake: 0,
-              envidoAcceptedStake: 0,
-              betInitiator: null,
-              awaitingResponse: false,
-              logs: addLog(context, `Envido declined. ${playerName({ ...context, ...scores }, initiator)} scores ${points}.`),
-            };
-          }),
-        },
+        NO_QUIERO: [
+          {
+            // Envido declined mid-truco: award envido refusal points, then
+            // bounce back to truco_betting to resolve the pending truco.
+            target: 'truco_betting',
+            guard: ({ context }) =>
+              context.awaitingResponse && context.betInitiator !== null && context.trucoInterrupted,
+            actions: assign(({ context }) => {
+              const envidoInitiator = context.betInitiator!;
+              const points = context.envidoAcceptedStake || 1;
+              const scores = awardPoints(context, envidoInitiator, points);
+              return {
+                ...scores,
+                envidoCalled: true,
+                envidoState: 'none' as EnvidoBet,
+                envidoStake: 0,
+                envidoAcceptedStake: 0,
+                trucoInterrupted: false,
+                betInitiator: context.pendingTrucoInitiator,
+                pendingTrucoInitiator: null,
+                awaitingResponse: true,
+                logs: addLog(
+                  context,
+                  `Envido declined. ${playerName({ ...context, ...scores }, envidoInitiator)} scores ${points}. Back to pending Truco.`,
+                ),
+              };
+            }),
+          },
+          {
+            target: 'playing',
+            guard: ({ context }) => context.awaitingResponse && context.betInitiator !== null,
+            actions: assign(({ context }) => {
+              const initiator = context.betInitiator!;
+              const points = context.envidoAcceptedStake || 1;
+              const scores = awardPoints(context, initiator, points);
+              return {
+                ...scores,
+                envidoCalled: true,
+                envidoState: 'none' as EnvidoBet,
+                envidoStake: 0,
+                envidoAcceptedStake: 0,
+                betInitiator: null,
+                awaitingResponse: false,
+                logs: addLog(
+                  context,
+                  `Envido declined. ${playerName({ ...context, ...scores }, initiator)} scores ${points}.`,
+                ),
+              };
+            }),
+          },
+        ],
 
         // Mazo during envido betting: refuse envido AND forfeit round.
         MAZO: {
@@ -567,6 +657,61 @@ export const trucoStateMachine = createMachine({
             betInitiator: context.currentTurn,
             logs: addLog(context, `${playerName(context, context.currentTurn)} raises to Vale Cuatro (4)`),
           })),
+        },
+
+        // Envido está primero — interrupt truco with an envido call.
+        // The envido caller is the truco *responder* (the non-initiator in 1v1).
+        CALL_ENVIDO: {
+          target: 'envido_betting',
+          guard: ({ context }) => canInterruptTrucoWithEnvido(context),
+          actions: assign(({ context }) => {
+            const envidoCaller = context.betInitiator === 0 ? 1 : 0;
+            return {
+              trucoInterrupted: true,
+              pendingTrucoInitiator: context.betInitiator,
+              envidoState: 'envido' as EnvidoBet,
+              envidoStake: 2,
+              envidoAcceptedStake: 0,
+              betInitiator: envidoCaller,
+              awaitingResponse: true,
+              logs: addLog(context, `${playerName(context, envidoCaller)} answers with Envido (2) — envido está primero`),
+            };
+          }),
+        },
+        CALL_REAL_ENVIDO: {
+          target: 'envido_betting',
+          guard: ({ context }) => canInterruptTrucoWithEnvido(context),
+          actions: assign(({ context }) => {
+            const envidoCaller = context.betInitiator === 0 ? 1 : 0;
+            return {
+              trucoInterrupted: true,
+              pendingTrucoInitiator: context.betInitiator,
+              envidoState: 'real_envido' as EnvidoBet,
+              envidoStake: 3,
+              envidoAcceptedStake: 0,
+              betInitiator: envidoCaller,
+              awaitingResponse: true,
+              logs: addLog(context, `${playerName(context, envidoCaller)} answers with Real Envido (3) — envido está primero`),
+            };
+          }),
+        },
+        CALL_FALTA_ENVIDO: {
+          target: 'envido_betting',
+          guard: ({ context }) => canInterruptTrucoWithEnvido(context),
+          actions: assign(({ context }) => {
+            const envidoCaller = context.betInitiator === 0 ? 1 : 0;
+            const points = falta(context);
+            return {
+              trucoInterrupted: true,
+              pendingTrucoInitiator: context.betInitiator,
+              envidoState: 'falta_envido' as EnvidoBet,
+              envidoStake: points,
+              envidoAcceptedStake: 0,
+              betInitiator: envidoCaller,
+              awaitingResponse: true,
+              logs: addLog(context, `${playerName(context, envidoCaller)} answers with Falta Envido (${points}) — envido está primero`),
+            };
+          }),
         },
 
         QUIERO: {

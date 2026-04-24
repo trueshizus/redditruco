@@ -57,6 +57,7 @@ export const App = () => {
   );
 
   const inPlaying = state.context.gameState === 'playing';
+  const inTrucoBetting = state.context.gameState === 'truco_betting';
   const holdingTruco = state.context.trucoHolder === state.context.currentTurn;
 
   const canCallTruco =
@@ -69,6 +70,20 @@ export const App = () => {
   const isInitiator = state.context.betInitiator === 0;
   const playerAwaitingResponse = canRespond && isInitiator;
   const playerMustRespond = canRespond && !isInitiator;
+
+  // Envido está primero: the truco responder can interrupt with envido.
+  const canInterruptWithEnvido =
+    inTrucoBetting &&
+    canRespond &&
+    state.context.board.currentTrick === 0 &&
+    state.context.board.cardsInPlay.player === null &&
+    state.context.board.cardsInPlay.adversary === null &&
+    !state.context.envidoCalled;
+
+  // Responder's counter-raise options inside truco_betting.
+  const respondWithRetruco = inTrucoBetting && canRespond && state.context.trucoState === 'truco';
+  const respondWithValeCuatro =
+    inTrucoBetting && canRespond && state.context.trucoState === 'retruco';
 
   const getPlayerStatusText = () => {
     if (playerAwaitingResponse) return 'Waiting for response…';
@@ -93,7 +108,11 @@ export const App = () => {
         <OpponentDebugPanel
           isVisible={state.context.currentTurn === 1 || (canRespond && state.context.betInitiator === 0)}
           opponentCards={state.context.currentTurn === 1 && inPlaying ? user2Cards : []}
-          canCallEnvido={state.context.currentTurn === 1 && canCallEnvidoValidation}
+          canCallEnvido={
+            (state.context.currentTurn === 1 && canCallEnvidoValidation) ||
+            // Envido está primero: opponent can respond to player's truco with envido.
+            (canInterruptWithEnvido && state.context.betInitiator === 0)
+          }
           canCallTruco={state.context.currentTurn === 1 && canCallTruco}
           canCallMazo={state.context.currentTurn === 1 && canCallMazo}
           canRespond={canRespond && state.context.betInitiator === 0}
@@ -231,6 +250,14 @@ export const App = () => {
         isVisible={playerMustRespond}
         onQuiero={handleQuiero}
         onNoQuiero={handleNoQuiero}
+        canInterruptWithEnvido={canInterruptWithEnvido}
+        onInterruptWithEnvido={handleEnvido}
+        onInterruptWithRealEnvido={handleRealEnvido}
+        onInterruptWithFaltaEnvido={handleFaltaEnvido}
+        canCallRetruco={respondWithRetruco}
+        canCallValeCuatro={respondWithValeCuatro}
+        onRetruco={handleRetruco}
+        onValeCuatro={handleValeCuatro}
       />
     </main>
   );

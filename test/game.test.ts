@@ -381,6 +381,87 @@ describe('Truco flow', () => {
   });
 });
 
+// ---------- Envido está primero ----------
+
+describe('Envido está primero (envido during truco)', () => {
+  it('call envido in response to truco → envido resolves → truco still pending', () => {
+    const actor = startGame();
+    const initialManoScore = actor.getSnapshot().context.mano;
+    actor.send({ type: 'CALL_TRUCO' });
+    expect(actor.getSnapshot().value).toBe('truco_betting');
+    const trucoInitiator = actor.getSnapshot().context.betInitiator;
+
+    actor.send({ type: 'CALL_ENVIDO' });
+    let s = actor.getSnapshot();
+    expect(s.value).toBe('envido_betting');
+    expect(s.context.trucoInterrupted).toBe(true);
+    expect(s.context.pendingTrucoInitiator).toBe(trucoInitiator);
+    expect(s.context.trucoState).toBe('truco'); // truco preserved
+    expect(s.context.roundStake).toBe(2);
+
+    actor.send({ type: 'QUIERO' });
+    s = actor.getSnapshot();
+    expect(s.value).toBe('truco_betting'); // back to pending truco
+    expect(s.context.trucoInterrupted).toBe(false);
+    expect(s.context.pendingTrucoInitiator).toBeNull();
+    expect(s.context.betInitiator).toBe(trucoInitiator);
+    expect(s.context.awaitingResponse).toBe(true);
+    expect(s.context.player.score + s.context.adversary.score).toBe(2); // envido paid out
+    expect(s.context.envidoCalled).toBe(true);
+    expect(s.context.mano).toBe(initialManoScore); // unchanged
+  });
+
+  it('NO_QUIERO to envido-at-truco awards envido refusal and bounces back to truco_betting', () => {
+    const actor = startGame();
+    actor.send({ type: 'CALL_TRUCO' });
+    actor.send({ type: 'CALL_REAL_ENVIDO' });
+    let s = actor.getSnapshot();
+    expect(s.context.envidoStake).toBe(3);
+
+    actor.send({ type: 'NO_QUIERO' });
+    s = actor.getSnapshot();
+    expect(s.value).toBe('truco_betting');
+    expect(s.context.player.score + s.context.adversary.score).toBe(1); // envido was initial → 1pt to real-envido caller
+    expect(s.context.trucoInterrupted).toBe(false);
+    expect(s.context.awaitingResponse).toBe(true);
+    expect(s.context.envidoCalled).toBe(true);
+  });
+
+  it('after envido-at-truco resolves, the truco can still be accepted or declined', () => {
+    const actor = startGame();
+    const trucoCaller = actor.getSnapshot().context.currentTurn;
+    actor.send({ type: 'CALL_TRUCO' });
+    actor.send({ type: 'CALL_ENVIDO' });
+    actor.send({ type: 'QUIERO' }); // envido resolves
+
+    // Now finish the truco with NO_QUIERO → caller wins 1 point (+ whatever envido awarded).
+    const beforeTrucoScore =
+      actor.getSnapshot().context.player.score + actor.getSnapshot().context.adversary.score;
+    actor.send({ type: 'NO_QUIERO' });
+    const s = actor.getSnapshot();
+    expect(s.value).toBe('round_complete');
+    expect(s.context.roundWinner).toBe(trucoCaller);
+    expect(s.context.player.score + s.context.adversary.score).toBe(beforeTrucoScore + 1);
+  });
+
+  it('envido at truco is rejected once a card has been played', () => {
+    const actor = startGame();
+    // Mano plays a card first.
+    const s0 = actor.getSnapshot();
+    const manoHand = s0.context.currentTurn === 0 ? s0.context.player.hand : s0.context.adversary.hand;
+    actor.send({ type: 'PLAY_CARD', cardId: manoHand[0]! });
+    // Other player now calls truco.
+    actor.send({ type: 'CALL_TRUCO' });
+    expect(actor.getSnapshot().value).toBe('truco_betting');
+    // Envido at truco should be blocked.
+    actor.send({ type: 'CALL_ENVIDO' });
+    // Guard rejects; state should NOT be envido_betting.
+    expect(actor.getSnapshot().value).toBe('truco_betting');
+    expect(actor.getSnapshot().context.envidoCalled).toBe(false);
+    expect(actor.getSnapshot().context.trucoInterrupted).toBe(false);
+  });
+});
+
 // ---------- MAZO ----------
 
 describe('MAZO forfeit', () => {

@@ -37,6 +37,8 @@ export interface TrucoSnapshot {
     envidoState: 'none' | 'envido' | 'real_envido' | 'falta_envido';
     trucoCalledThisRound: boolean;
     trucoHolder: number | null;
+    trucoInterrupted: boolean;
+    pendingTrucoInitiator: number | null;
     gameState: TrucoState;
     betInitiator: number | null;
     awaitingResponse: boolean;
@@ -72,10 +74,14 @@ export type Owner = 'player' | 'opponent';
  * Click the button that dispatches the given state-machine event.
  * `owner` picks between the bottom player's controls and the opponent
  * debug panel's mirrored controls.
+ *
+ * Filters to the enabled element because the same testid can appear on a
+ * disabled twin (e.g. PlayerSection's Envido buttons are disabled while the
+ * SlidingResponseOverlay's envido-at-truco buttons are active).
  */
 export async function action(page: Page, event: string, owner: Owner = 'player'): Promise<void> {
   const prefix = owner === 'opponent' ? 'opponent-action' : 'action';
-  await page.locator(`[data-testid="${prefix}-${event}"]`).click();
+  await page.locator(`[data-testid="${prefix}-${event}"]:not([disabled])`).click();
 }
 
 /**
