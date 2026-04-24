@@ -4,13 +4,12 @@ import { OpponentStatusBar } from './components/OpponentStatusBar';
 import { OpponentDebugPanel } from './components/OpponentDebugPanel';
 import { PlayerSection } from './components/PlayerSection';
 import { SlidingResponseOverlay } from './components/SlidingResponseOverlay';
-import { trucoStateMachine, canCallEnvido } from '../machines/truco';
 import { useTranslation } from './hooks/useTranslation';
 
 
 
 export const App = () => {
-  const [state, send] = useMachine(trucoStateMachine);
+  const [state, send] = useMachine();
   const { t, language, setLanguage } = useTranslation();
 
   // Use cards from state machine context instead of hardcoded values  
