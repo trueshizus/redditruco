@@ -20,12 +20,14 @@ export const SlidingResponseOverlay = ({ isVisible, onQuiero, onNoQuiero }: Slid
             <div className="text-yellow-200 text-sm font-medium mb-3 text-center">⚡ Response Required</div>
             <div className="grid grid-cols-2 gap-4">
               <button
+                data-testid="action-QUIERO"
                 onClick={onQuiero}
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-5 px-6 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
                 ✓ Quiero
               </button>
               <button
+                data-testid="action-NO_QUIERO"
                 onClick={onNoQuiero}
                 className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-5 px-6 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
               >

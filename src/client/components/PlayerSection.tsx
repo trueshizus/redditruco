@@ -46,21 +46,20 @@ export const PlayerSection = ({
   onMazo,
 }: PlayerSectionProps) => {
   // Highest legal truco escalation right now (if any).
-  const trucoLabel = canCallValeCuatro
-    ? 'Vale 4'
+  const trucoLabel = canCallValeCuatro ? 'Vale 4' : canCallRetruco ? 'Retruco' : 'Truco';
+  const trucoHandler = canCallValeCuatro ? onValeCuatro : canCallRetruco ? onRetruco : onTruco;
+  const trucoAction = canCallValeCuatro
+    ? 'CALL_VALE_CUATRO'
     : canCallRetruco
-    ? 'Retruco'
-    : 'Truco';
-  const trucoHandler = canCallValeCuatro
-    ? onValeCuatro
-    : canCallRetruco
-    ? onRetruco
-    : onTruco;
+    ? 'CALL_RETRUCO'
+    : 'CALL_TRUCO';
   const trucoEnabled =
     isPlayerTurn && (canCallTruco || canCallRetruco || canCallValeCuatro);
   return (
-    <div className="h-full flex flex-col bg-gradient-to-t from-slate-900/95 to-slate-800/90 backdrop-blur-sm">
-      
+    <div
+      className="h-full flex flex-col bg-gradient-to-t from-slate-900/95 to-slate-800/90 backdrop-blur-sm"
+      data-testid="player-section"
+    >
       {/* Player Status - Compact header */}
       <div className="px-4 py-2 border-b border-yellow-500/20">
         <div className="flex items-center justify-between">
@@ -68,10 +67,14 @@ export const PlayerSection = ({
             <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
               {playerName.charAt(0)}
             </div>
-            <div className="text-white text-sm font-medium">{playerName}</div>
+            <div className="text-white text-sm font-medium" data-testid="player-name">
+              {playerName}
+            </div>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="text-yellow-300 text-xs">{statusText}</div>
+            <div className="text-yellow-300 text-xs" data-testid="player-status">
+              {statusText}
+            </div>
             {isPlayerTurn && (
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             )}
@@ -110,6 +113,7 @@ export const PlayerSection = ({
           {/* Primary Actions Row */}
           <div className="grid grid-cols-2 gap-3">
             <button
+              data-testid={`action-${trucoAction}`}
               onClick={trucoHandler}
               disabled={!trucoEnabled}
               className={`py-4 px-4 rounded-xl text-base font-bold shadow-xl transition-all duration-200 transform ${
@@ -121,6 +125,7 @@ export const PlayerSection = ({
               🎯 {trucoLabel}
             </button>
             <button
+              data-testid="action-MAZO"
               onClick={onMazo}
               disabled={!(isPlayerTurn && canCallMazo)}
               className={`py-4 px-4 rounded-xl text-base font-bold shadow-xl transition-all duration-200 transform ${
@@ -136,6 +141,7 @@ export const PlayerSection = ({
           {/* Envido Actions Row */}
           <div className="grid grid-cols-3 gap-2">
             <button
+              data-testid="action-CALL_ENVIDO"
               onClick={onEnvido}
               disabled={!(isPlayerTurn && canCallEnvido)}
               className={`py-3 px-2 rounded-lg text-sm font-semibold shadow-lg transition-all duration-200 transform ${
@@ -147,6 +153,7 @@ export const PlayerSection = ({
               Envido
             </button>
             <button
+              data-testid="action-CALL_REAL_ENVIDO"
               onClick={onRealEnvido}
               disabled={!(isPlayerTurn && canCallEnvido)}
               className={`py-3 px-2 rounded-lg text-sm font-semibold shadow-lg transition-all duration-200 transform ${
@@ -158,6 +165,7 @@ export const PlayerSection = ({
               Real
             </button>
             <button
+              data-testid="action-CALL_FALTA_ENVIDO"
               onClick={onFaltaEnvido}
               disabled={!(isPlayerTurn && canCallEnvido)}
               className={`py-3 px-2 rounded-lg text-sm font-semibold shadow-lg transition-all duration-200 transform ${

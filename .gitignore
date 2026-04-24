@@ -9,7 +9,11 @@ yarn-error.log*
 webroot
 dist
 .playwright-mcp
+.playwright-cli
+playwright-report
+test-results
 .cursor/
+.claude
 .cursorignore
 .mcp.json
 .vscode/

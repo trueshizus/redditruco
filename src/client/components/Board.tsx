@@ -23,6 +23,7 @@ interface BoardProps {
   roundStake: number;
   language: 'en' | 'es';
   setLanguage: (lang: 'en' | 'es') => void;
+  showBettingBanner?: boolean;
 }
 
 export const Board = ({
@@ -39,6 +40,7 @@ export const Board = ({
   roundStake,
   language,
   setLanguage,
+  showBettingBanner = true,
 }: BoardProps) => {
   return (
     <div className="h-full flex flex-col relative bg-gradient-to-br from-emerald-900/40 to-green-900/40 backdrop-blur-sm">
@@ -47,10 +49,10 @@ export const Board = ({
       <div className="px-4 py-2 bg-black/20 backdrop-blur-md border-b border-yellow-500/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-white font-bold text-base">
-              <span className="text-yellow-300">{playerScore}</span>
+            <div className="text-white font-bold text-base" data-testid="score">
+              <span className="text-yellow-300" data-testid="score-player">{playerScore}</span>
               <span className="text-yellow-200 mx-1">-</span>
-              <span className="text-yellow-300">{adversaryScore}</span>
+              <span className="text-yellow-300" data-testid="score-adversary">{adversaryScore}</span>
             </div>
             <div className="text-yellow-200/80 text-sm">
               Round {Math.floor((playerScore + adversaryScore) / 2) + 1}
@@ -82,8 +84,11 @@ export const Board = ({
       </div>
 
       {/* Betting Status Bar */}
-      {(envidoState !== 'none' || trucoState !== 'none') && (
-        <div className="px-4 py-2 bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border-b border-yellow-500/40">
+      {showBettingBanner && (envidoState !== 'none' || trucoState !== 'none') && (
+        <div
+          className="px-4 py-2 bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border-b border-yellow-500/40"
+          data-testid="betting-banner"
+        >
           <div className="text-center">
             {envidoState !== 'none' && (
               <span className="text-yellow-100 text-sm font-semibold">
