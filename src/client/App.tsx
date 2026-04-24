@@ -10,7 +10,7 @@ import { useTranslation } from './hooks/useTranslation';
 
 export const App = () => {
   const [state, send] = useMachine(trucoStateMachine);
-  const { language, setLanguage } = useTranslation();
+  const { language, setLanguage, t } = useTranslation();
 
   // Dev-only: expose the state machine snapshot for Playwright tests.
   useEffect(() => {
@@ -86,10 +86,10 @@ export const App = () => {
     inTrucoBetting && canRespond && state.context.trucoState === 'retruco';
 
   const getPlayerStatusText = () => {
-    if (playerAwaitingResponse) return 'Waiting for response…';
-    if (playerMustRespond) return 'Respond to bet';
-    if (state.context.currentTurn === 0 && inPlaying) return 'Your turn';
-    return 'Waiting…';
+    if (playerAwaitingResponse) return t.status.waitingForResponse;
+    if (playerMustRespond) return t.status.respondToBet;
+    if (state.context.currentTurn === 0 && inPlaying) return t.status.yourTurn;
+    return t.status.waiting;
   };
 
   return (
@@ -100,7 +100,6 @@ export const App = () => {
     >
       <section className="h-full flex flex-col overflow-hidden">
         <OpponentStatusBar
-          opponentName={state.context.adversary.name}
           cardCount={user2Cards.length}
           isOpponentTurn={state.context.currentTurn === 1}
         />
@@ -153,13 +152,13 @@ export const App = () => {
           <div className="flex flex-col items-center space-y-4">
             {state.value === 'idle' && (
               <div className="text-center">
-                <div className="text-yellow-100 text-lg font-medium mb-4">Ready to Play Truco?</div>
+                <div className="text-yellow-100 text-lg font-medium mb-4">{t.idle.prompt}</div>
                 <button
                   data-testid="action-START_GAME"
                   onClick={handleStartGame}
                   className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105"
                 >
-                  🎴 Start Game
+                  {t.idle.startButton}
                 </button>
               </div>
             )}
@@ -167,9 +166,11 @@ export const App = () => {
               <div className="text-center space-y-4">
                 <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4">
                   <div className="text-yellow-100 text-lg font-bold" data-testid="trick-result">
-                    {state.context.board.trickWinner !== null
-                      ? `🏆 ${state.context.board.trickWinner === 0 ? 'You' : 'Opponent'} won the trick!`
-                      : '🤝 Trick Tied (Parda)'}
+                    {state.context.board.trickWinner === null
+                      ? t.trick.parda
+                      : state.context.board.trickWinner === 0
+                      ? t.trick.youWon
+                      : t.trick.opponentWon}
                   </div>
                 </div>
                 <button
@@ -177,7 +178,7 @@ export const App = () => {
                   onClick={handleContinue}
                   className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-3 rounded-lg text-base font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
                 >
-                  Continue →
+                  {t.trick.continue}
                 </button>
               </div>
             )}
@@ -185,7 +186,7 @@ export const App = () => {
               <div className="text-center space-y-4">
                 <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg p-4">
                   <div className="text-yellow-100 text-lg font-bold" data-testid="round-result">
-                    🎉 Round Winner: {state.context.roundWinner === 0 ? 'You!' : 'Opponent'}
+                    {state.context.roundWinner === 0 ? t.round.youWon : t.round.opponentWon}
                   </div>
                 </div>
                 <button
@@ -193,7 +194,7 @@ export const App = () => {
                   onClick={handleStartNewHand}
                   className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6 py-3 rounded-lg text-base font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
                 >
-                  Next Round →
+                  {t.round.nextRound}
                 </button>
               </div>
             )}
@@ -201,13 +202,13 @@ export const App = () => {
               <div className="text-center space-y-4">
                 <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-6">
                   <div className="text-2xl font-bold text-yellow-300 mb-2" data-testid="game-over">
-                    🎊 Game Over!
+                    {t.gameOver.title}
                   </div>
                   <div className="text-lg text-yellow-200 mb-2">
-                    Winner: {state.context.gameWinner === 0 ? 'You!' : 'Opponent'}
+                    {state.context.gameWinner === 0 ? t.gameOver.youWin : t.gameOver.opponentWins}
                   </div>
                   <div className="text-yellow-300">
-                    Final Score: {state.context.player.score} - {state.context.adversary.score}
+                    {t.gameOver.finalScore}: {state.context.player.score} - {state.context.adversary.score}
                   </div>
                 </div>
                 <button
@@ -215,7 +216,7 @@ export const App = () => {
                   onClick={() => send({ type: 'RESTART_GAME' })}
                   className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105"
                 >
-                  🎴 Play Again
+                  {t.gameOver.restart}
                 </button>
               </div>
             )}
@@ -225,7 +226,6 @@ export const App = () => {
 
       <section className="row-span-5 h-full flex flex-col overflow-hidden">
         <PlayerSection
-          playerName={state.context.player.name}
           playerCards={user1Cards}
           isPlayerTurn={state.context.currentTurn === 0}
           statusText={getPlayerStatusText()}

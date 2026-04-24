@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import Draggable from 'react-draggable';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface OpponentDebugPanelProps {
   isVisible: boolean;
@@ -40,6 +41,7 @@ export const OpponentDebugPanel = ({
   onRetruco,
   onValeCuatro
 }: OpponentDebugPanelProps) => {
+  const { t } = useTranslation();
   const [isMinimized, setIsMinimized] = useState(false);
   const nodeRef = useRef(null);
 
@@ -59,9 +61,11 @@ export const OpponentDebugPanel = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-              <h3 className="text-blue-200 text-sm font-semibold select-none">Debug Panel</h3>
+              <h3 className="text-blue-200 text-sm font-semibold select-none">
+                {t.debugPanel.title}
+              </h3>
               <div className="px-2 py-1 bg-blue-600/30 rounded-md">
-                <span className="text-blue-300 text-xs font-medium">🤖 AI</span>
+                <span className="text-blue-300 text-xs font-medium">{t.debugPanel.aiBadge}</span>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -85,7 +89,7 @@ export const OpponentDebugPanel = ({
                 <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
                   <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
                     <span className="text-base mr-2">🃏</span>
-                    Play Card
+                    {t.debugPanel.playCardHeading}
                   </h4>
                   <div className="grid grid-cols-3 gap-2">
                     {opponentCards.map((cardId) => (
@@ -108,7 +112,7 @@ export const OpponentDebugPanel = ({
                 <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
                   <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
                     <span className="text-base mr-2">⚡</span>
-                    Envido Bets
+                    {t.debugPanel.envidoHeading}
                   </h4>
                   <div className="grid grid-cols-3 gap-2">
                     <button
@@ -116,21 +120,21 @@ export const OpponentDebugPanel = ({
                       onClick={onCallEnvido}
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
-                      Envido
+                      {t.playerSection.envido}
                     </button>
                     <button
                       data-testid="opponent-action-CALL_REAL_ENVIDO"
                       onClick={onCallRealEnvido}
                       className="bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
-                      Real
+                      {t.playerSection.realEnvido}
                     </button>
                     <button
                       data-testid="opponent-action-CALL_FALTA_ENVIDO"
                       onClick={onCallFaltaEnvido}
                       className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
-                      Falta
+                      {t.playerSection.faltaEnvido}
                     </button>
                   </div>
                 </div>
@@ -141,35 +145,33 @@ export const OpponentDebugPanel = ({
                 <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
                   <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
                     <span className="text-base mr-2">⚡</span>
-                    Response
+                    {t.debugPanel.responseHeading}
                   </h4>
                   <div className="space-y-2">
-                    {/* Accept/Reject Row */}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         data-testid="opponent-action-QUIERO"
                         onClick={onQuiero}
                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                       >
-                        ✓ Quiero
+                        {t.debugPanel.quiero}
                       </button>
                       <button
                         data-testid="opponent-action-NO_QUIERO"
                         onClick={onNoQuiero}
                         className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                       >
-                        ✗ No Quiero
+                        {t.debugPanel.noQuiero}
                       </button>
                     </div>
 
-                    {/* Escalation Options */}
                     {trucoState === 'truco' && (
                       <button
                         data-testid="opponent-action-CALL_RETRUCO"
                         onClick={onRetruco}
                         className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                       >
-                        🎯 Quiero Re-Truco
+                        {t.debugPanel.quieroRetruco}
                       </button>
                     )}
 
@@ -179,7 +181,7 @@ export const OpponentDebugPanel = ({
                         onClick={onValeCuatro}
                         className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                       >
-                        🎯 Quiero Vale Cuatro
+                        {t.debugPanel.quieroValeCuatro}
                       </button>
                     )}
                   </div>
@@ -190,7 +192,7 @@ export const OpponentDebugPanel = ({
               <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
                 <h4 className="text-slate-300 text-sm font-medium mb-3 flex items-center">
                   <span className="text-base mr-2">🎯</span>
-                  Actions
+                  {t.debugPanel.actionsHeading}
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
                   {canCallTruco && (
@@ -199,7 +201,7 @@ export const OpponentDebugPanel = ({
                       onClick={onCallTruco}
                       className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
-                      🎯 Truco
+                      {t.debugPanel.truco}
                     </button>
                   )}
                   {canCallMazo && (
@@ -208,7 +210,7 @@ export const OpponentDebugPanel = ({
                       onClick={onCallMazo}
                       className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-2 py-1 rounded-md text-xs font-semibold transition-all duration-200"
                     >
-                      🃏 Mazo
+                      {t.debugPanel.mazo}
                     </button>
                   )}
                 </div>

@@ -1,3 +1,5 @@
+import { useTranslation } from '../hooks/useTranslation';
+
 interface SlidingResponseOverlayProps {
   isVisible: boolean;
   onQuiero: () => void;
@@ -28,6 +30,7 @@ export const SlidingResponseOverlay = ({
   onRetruco,
   onValeCuatro,
 }: SlidingResponseOverlayProps) => {
+  const { t } = useTranslation();
   if (!isVisible) return null;
 
   return (
@@ -37,21 +40,23 @@ export const SlidingResponseOverlay = ({
       <div className="fixed inset-x-0 bottom-0 z-50 transition-all duration-400 ease-out transform translate-y-0 opacity-100">
         <div className="bg-gradient-to-t from-slate-950/98 to-slate-900/98 backdrop-blur-xl px-4 py-4 border-t border-yellow-500/50 shadow-2xl space-y-3">
           <div className="animate-slide-up">
-            <div className="text-yellow-200 text-sm font-medium mb-3 text-center">⚡ Response Required</div>
+            <div className="text-yellow-200 text-sm font-medium mb-3 text-center">
+              {t.response.required}
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <button
                 data-testid="action-QUIERO"
                 onClick={onQuiero}
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-5 px-6 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
-                ✓ Quiero
+                {t.response.quiero}
               </button>
               <button
                 data-testid="action-NO_QUIERO"
                 onClick={onNoQuiero}
                 className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-5 px-6 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
-                ✗ No Quiero
+                {t.response.noQuiero}
               </button>
             </div>
           </div>
@@ -64,7 +69,7 @@ export const SlidingResponseOverlay = ({
                   onClick={onRetruco}
                   className="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white py-3 px-4 rounded-lg text-base font-semibold shadow-lg transition-all duration-200"
                 >
-                  🎯 Quiero Retruco
+                  {t.response.quieroRetruco}
                 </button>
               )}
               {canCallValeCuatro && onValeCuatro && (
@@ -73,7 +78,7 @@ export const SlidingResponseOverlay = ({
                   onClick={onValeCuatro}
                   className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white py-3 px-4 rounded-lg text-base font-semibold shadow-lg transition-all duration-200"
                 >
-                  🎯 Quiero Vale Cuatro
+                  {t.response.quieroValeCuatro}
                 </button>
               )}
             </div>
@@ -82,7 +87,7 @@ export const SlidingResponseOverlay = ({
           {canInterruptWithEnvido && (
             <div>
               <div className="text-yellow-200/80 text-xs mb-2 text-center">
-                ⚡ Envido está primero
+                {t.response.envidoEstaPrimero}
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {onInterruptWithEnvido && (
@@ -91,7 +96,7 @@ export const SlidingResponseOverlay = ({
                     onClick={onInterruptWithEnvido}
                     className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-2 rounded-lg text-sm font-semibold transition-all duration-200"
                   >
-                    Envido
+                    {t.response.envido}
                   </button>
                 )}
                 {onInterruptWithRealEnvido && (
@@ -100,7 +105,7 @@ export const SlidingResponseOverlay = ({
                     onClick={onInterruptWithRealEnvido}
                     className="bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-2 rounded-lg text-sm font-semibold transition-all duration-200"
                   >
-                    Real
+                    {t.response.realEnvido}
                   </button>
                 )}
                 {onInterruptWithFaltaEnvido && (
@@ -109,7 +114,7 @@ export const SlidingResponseOverlay = ({
                     onClick={onInterruptWithFaltaEnvido}
                     className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-2 rounded-lg text-sm font-semibold transition-all duration-200"
                   >
-                    Falta
+                    {t.response.faltaEnvido}
                   </button>
                 )}
               </div>

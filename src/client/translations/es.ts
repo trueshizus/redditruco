@@ -1,84 +1,79 @@
+// Argentine Spanish (voseo + authentic Truco idioms).
 export const es = {
+  common: {
+    you: 'Vos',
+    opponent: 'Oponente',
+    vs: 'VS',
+  },
   board: {
-    title: "TRUCO",
-    description: "Selecciona y juega tus cartas",
-    trickStatus: (num: number) => `Baza ${num}/3`,
-    playAreas: {
-      player1: "Jugador 1",
-      player2: "Jugador 2"
-    }
+    round: (n: number) => `Ronda ${n}`,
+    envidoStake: (n: number) => `Envido: ${n} pts`,
+    trucoStake: (n: number) => `Truco: ${n} pts`,
   },
-  game: {
-    states: {
-      idle: "Esperando para empezar",
-      dealing: "Repartiendo cartas",
-      playing: "Jugando",
-      envidoBetting: "Apostando Envido",
-      trucoBetting: "Apostando Truco", 
-      handComplete: "Mano Completa",
-      finished: "Juego Terminado"
-    },
-    info: {
-      currentTurn: "Turno Actual",
-      score: "Puntuación",
-      dealer: "Repartidor",
-      mano: "Mano",
-      cardsDealt: (dealt: number, total: number) => `Cartas repartidas: ${dealt}/${total}`,
-      matchId: "ID de Partida"
-    },
-    winner: {
-      gameOver: "🏆 ¡JUEGO TERMINADO! 🏆",
-      winner: "Ganador",
-      finalScore: "Puntuación Final"
-    }
+  status: {
+    yourTurn: 'Tu turno',
+    waitingForResponse: 'Esperando respuesta…',
+    respondToBet: 'Respondé',
+    waiting: 'Esperando…',
   },
-  player: {
-    currentTurn: "(Turno Actual)",
-    cards: (count: number) => `Cartas: ${count}`,
-    noCards: "No hay cartas repartidas"
+  idle: {
+    prompt: '¿Listo para jugar al Truco?',
+    startButton: '🎴 Empezar',
   },
-  actions: {
-    buttons: {
-      startGame: "Empezar Juego y Repartir",
-      playCard: "Jugar Carta Seleccionada",
-      startNewHand: "Empezar Nueva Mano",
-      envido: "Envido",
-      realEnvido: "Real Envido",
-      faltaEnvido: "Falta Envido", 
-      truco: "Truco",
-      retruco: "Retruco",
-      valeCuatro: "Vale Cuatro",
-      quiero: "Quiero",
-      noQuiero: "No Quiero",
-      mazo: "Mazo",
-      continue: "Continuar"
-    }
+  trick: {
+    youWon: '🏆 ¡Ganaste la baza!',
+    opponentWon: '🏆 ¡El oponente ganó la baza!',
+    parda: '🤝 Parda',
+    continue: 'Continuar →',
   },
-  betting: {
-    called: (player: string, bet: string, points: number) => `${player} cantó: ${bet.replace('_', ' ').toUpperCase()}(${points} pts)`,
-    handWinner: (player: string) => `Ganador de la Mano: ${player}`
+  round: {
+    youWon: '🎉 Ganaste la ronda',
+    opponentWon: '🎉 Ganó la ronda el oponente',
+    nextRound: 'Siguiente ronda →',
   },
-  logs: {
-    title: "Registro de Partida",
-    gameInitialized: "Juego inicializado",
-    roundBegins: (round: number) => `Ronda ${round} comienza`,
-    cardsDealt: "Cartas repartidas a los jugadores",
-    cardPlayed: (player: string, card: string) => `${player} juega ${card}`,
-    trickWon: (player: string, trick: number) => `${player} gana la baza ${trick}`,
-    trickTied: (trick: number) => `Baza ${trick} está empatada (parda)`,
-    envidoCalled: (player: string, points: number) => `${player} canta Envido (${points} pts)`,
-    realEnvidoCalled: (player: string, points: number) => `${player} canta Real Envido (${points} pts)`,
-    faltaEnvidoCalled: (player: string, points: number) => `${player} canta Falta Envido (${points} pts)`,
-    trucoCalled: (player: string, points: number) => `${player} canta Truco (${points} pts)`,
-    retrucoCalled: (player: string, points: number) => `${player} canta Retruco (${points} pts)`,
-    valeCuatroCalled: (player: string, points: number) => `${player} canta Vale Cuatro (${points} pts)`,
-    envidoAccepted: (winner: string, p1Points: number, p2Points: number, stake: number) => `Envido aceptado. Jugador 1: ${p1Points}, Jugador 2: ${p2Points}. ${winner} gana ${stake} pts`,
-    envidoDeclined: (winner: string) => `Envido rechazado. ${winner} anota 1 punto`,
-    trucoAccepted: (stake: number) => `Truco aceptado. Ronda vale ${stake} puntos`,
-    trucoDeclined: (winner: string, points: number) => `Truco rechazado. ${winner} gana ${points} puntos`,
-    roundComplete: (winner: string) => `Ronda completa. ¡${winner} gana!`,
-    gameOver: (winner: string) => `¡Juego terminado! ¡${winner} gana la partida!`,
-    newRound: "--- Empezando nueva ronda ---",
-    goesToDeck: (player: string, winner: string) => `${player} se va al mazo. ¡${winner} gana la ronda!`
-  }
+  gameOver: {
+    title: '🎊 ¡Se acabó!',
+    youWin: '¡Ganaste!',
+    opponentWins: 'Ganó el oponente',
+    finalScore: 'Puntaje final',
+    restart: '🎴 Jugar de nuevo',
+  },
+  playerSection: {
+    noCards: 'Sin cartas en la mano',
+    truco: 'Truco',
+    retruco: 'Retruco',
+    valeCuatro: 'Vale Cuatro',
+    mazo: 'Me voy al mazo',
+    envido: 'Envido',
+    realEnvido: 'Real',
+    faltaEnvido: 'Falta',
+  },
+  opponentStatus: {
+    cardsCount: (n: number) => `${n} carta${n === 1 ? '' : 's'}`,
+  },
+  debugPanel: {
+    title: 'Panel de Debug',
+    aiBadge: '🤖 IA',
+    playCardHeading: 'Jugar carta',
+    envidoHeading: 'Envido',
+    responseHeading: 'Respuesta',
+    actionsHeading: 'Acciones',
+    quiero: '✓ Quiero',
+    noQuiero: '✗ No quiero',
+    quieroRetruco: '🎯 Quiero Retruco',
+    quieroValeCuatro: '🎯 Quiero Vale Cuatro',
+    truco: '🎯 Truco',
+    mazo: '🃏 Al mazo',
+  },
+  response: {
+    required: '⚡ Respondé',
+    quiero: '✓ Quiero',
+    noQuiero: '✗ No quiero',
+    quieroRetruco: '🎯 Quiero Retruco',
+    quieroValeCuatro: '🎯 Quiero Vale Cuatro',
+    envidoEstaPrimero: '⚡ El envido está primero',
+    envido: 'Envido',
+    realEnvido: 'Real',
+    faltaEnvido: 'Falta',
+  },
 };

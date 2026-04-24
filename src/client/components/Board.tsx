@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Trick {
   player1Card: string | null;
@@ -42,6 +43,8 @@ export const Board = ({
   setLanguage,
   showBettingBanner = true,
 }: BoardProps) => {
+  const { t } = useTranslation();
+  const roundNumber = Math.floor((playerScore + adversaryScore) / 2) + 1;
   return (
     <div className="h-full flex flex-col relative bg-gradient-to-br from-emerald-900/40 to-green-900/40 backdrop-blur-sm">
       
@@ -54,8 +57,8 @@ export const Board = ({
               <span className="text-yellow-200 mx-1">-</span>
               <span className="text-yellow-300" data-testid="score-adversary">{adversaryScore}</span>
             </div>
-            <div className="text-yellow-200/80 text-sm">
-              Round {Math.floor((playerScore + adversaryScore) / 2) + 1}
+            <div className="text-yellow-200/80 text-sm" data-testid="round-label">
+              {t.board.round(roundNumber)}
             </div>
           </div>
           <div className="flex gap-1">
@@ -92,12 +95,12 @@ export const Board = ({
           <div className="text-center">
             {envidoState !== 'none' && (
               <span className="text-yellow-100 text-sm font-semibold">
-                ⚡ Envido: {envidoStake} pts
+                ⚡ {t.board.envidoStake(envidoStake)}
               </span>
             )}
             {trucoState !== 'none' && (
               <span className="text-yellow-100 text-sm font-semibold">
-                🎯 Truco: {roundStake} pts
+                🎯 {t.board.trucoStake(roundStake)}
               </span>
             )}
           </div>
@@ -110,7 +113,7 @@ export const Board = ({
           
           {/* Player Card */}
           <div className="flex flex-col items-center space-y-2">
-            <div className="text-yellow-200 text-xs font-medium">You</div>
+            <div className="text-yellow-200 text-xs font-medium">{t.common.you}</div>
             <div className="w-24 h-36 bg-gradient-to-br from-green-600/20 to-emerald-700/20 border-2 border-dashed border-yellow-400/50 rounded-xl flex items-center justify-center shadow-xl backdrop-blur-sm">
               {(cardsInPlay.player || currentTrick.player1Card) ? (
                 <img
@@ -126,7 +129,7 @@ export const Board = ({
 
           {/* VS & Trick Progress */}
           <div className="flex flex-col items-center space-y-3">
-            <div className="text-yellow-100 text-xl font-bold">VS</div>
+            <div className="text-yellow-100 text-xl font-bold">{t.common.vs}</div>
             <div className="flex space-x-2">
               {[0, 1, 2].map((trickIndex) => {
                 const trick = tricks[trickIndex];
@@ -155,7 +158,7 @@ export const Board = ({
 
           {/* Opponent Card */}
           <div className="flex flex-col items-center space-y-2">
-            <div className="text-yellow-200 text-xs font-medium">Opp</div>
+            <div className="text-yellow-200 text-xs font-medium">{t.common.opponent}</div>
             <div className="w-24 h-36 bg-gradient-to-br from-red-600/20 to-orange-700/20 border-2 border-dashed border-yellow-400/50 rounded-xl flex items-center justify-center shadow-xl backdrop-blur-sm">
               {(cardsInPlay.adversary || currentTrick.player2Card) ? (
                 <img
