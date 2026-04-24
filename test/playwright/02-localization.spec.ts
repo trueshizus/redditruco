@@ -32,7 +32,8 @@ test.describe('02 localization — EN ↔ ES toggle', () => {
     await action(page, 'START_GAME');
 
     await expect(page.getByTestId('opponent-card-count')).toHaveText('3 cartas');
-    await expect(page.getByTestId('round-label')).toHaveText('Ronda 1');
+    // "Mano" — Argentine Truco terminology (not "Ronda").
+    await expect(page.getByTestId('round-label')).toHaveText('Mano 1');
     // The player row label becomes "Vos" (Argentine voseo).
     await expect(page.getByTestId('player-name')).toHaveText('Vos');
   });
@@ -72,7 +73,7 @@ test.describe('02 localization — EN ↔ ES toggle', () => {
     // game_over reached. Flip to ES and verify Spanish labels.
     await expect(page.getByTestId('game-over')).toBeVisible();
     await page.getByRole('button', { name: 'ES' }).click();
-    await expect(page.getByTestId('game-over')).toHaveText('🎊 ¡Se acabó!');
+    await expect(page.getByTestId('game-over')).toHaveText('🎊 ¡Terminó la partida!');
     await expect(page.getByTestId('action-RESTART_GAME')).toContainText('Jugar de nuevo');
   });
 });

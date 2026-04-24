@@ -1,18 +1,23 @@
-// Argentine Spanish (voseo + authentic Truco idioms).
+// Argentine Spanish: voseo + register/terminology a real player would use.
+//   - "mano" for a hand of 3 bazas (not "ronda").
+//   - "rival" in place of "oponente" — card-game parlance in the Río de la Plata.
+//   - "te toca" / "próxima" / "seguir" — colloquial register over stiff cognates.
+//   - "llevarse la baza" — idiomatic for winning a trick.
+//   - "partida" for the full first-to-30 match.
 export const es = {
   common: {
     you: 'Vos',
-    opponent: 'Oponente',
+    opponent: 'Rival',
     vs: 'VS',
   },
   board: {
-    round: (n: number) => `Ronda ${n}`,
+    round: (n: number) => `Mano ${n}`,
     envidoStake: (n: number) => `Envido: ${n} pts`,
     trucoStake: (n: number) => `Truco: ${n} pts`,
   },
   status: {
-    yourTurn: 'Tu turno',
-    waitingForResponse: 'Esperando respuesta…',
+    yourTurn: 'Te toca',
+    waitingForResponse: 'Esperando que responda…',
     respondToBet: 'Respondé',
     waiting: 'Esperando…',
   },
@@ -21,25 +26,25 @@ export const es = {
     startButton: '🎴 Empezar',
   },
   trick: {
-    youWon: '🏆 ¡Ganaste la baza!',
-    opponentWon: '🏆 ¡El oponente ganó la baza!',
+    youWon: '🏆 ¡Te llevaste la baza!',
+    opponentWon: '🏆 Se la llevó el rival',
     parda: '🤝 Parda',
-    continue: 'Continuar →',
+    continue: 'Seguir →',
   },
   round: {
-    youWon: '🎉 Ganaste la ronda',
-    opponentWon: '🎉 Ganó la ronda el oponente',
-    nextRound: 'Siguiente ronda →',
+    youWon: '🎉 ¡Ganaste la mano!',
+    opponentWon: '🎉 Ganó la mano el rival',
+    nextRound: 'Próxima mano →',
   },
   gameOver: {
-    title: '🎊 ¡Se acabó!',
+    title: '🎊 ¡Terminó la partida!',
     youWin: '¡Ganaste!',
-    opponentWins: 'Ganó el oponente',
+    opponentWins: 'Ganó el rival',
     finalScore: 'Puntaje final',
     restart: '🎴 Jugar de nuevo',
   },
   playerSection: {
-    noCards: 'Sin cartas en la mano',
+    noCards: 'Sin cartas en mano',
     truco: 'Truco',
     retruco: 'Retruco',
     valeCuatro: 'Vale Cuatro',
