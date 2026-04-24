@@ -1,0 +1,9 @@
+{
+  "name": "truco-lesson",
+  "description": "A ~3-minute open-class video explaining how to play Argentine Truco. Visual conceit: a gaucho's field journal, lit by a kerosene lamp, whose pages hold the rules and whose spreads assemble the game's state machine as a hand-inked diagram.",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "duration": 210,
+  "language": "es-AR"
+}
