@@ -9,14 +9,14 @@ interface CardProps {
 }
 
 export const Card = ({ id, isSelected, isFlipped, onSelect, onToggleFlip }: CardProps) => {
-  const cardPath = `/cards/${id}`;
+  const cardPath = `/cards/${id}.svg`;
 
   const getCardClass = () => {
     let baseClass =
-      'w-24 h-36 transition-all duration-300 cursor-pointer rounded-lg shadow-lg hover:shadow-xl';
+      'w-14 h-20 sm:w-20 sm:h-28 md:w-24 md:h-36 transition-all duration-300 cursor-pointer rounded-lg shadow-lg hover:shadow-xl';
 
     if (isSelected) {
-      baseClass += ' ring-4 ring-yellow-400 transform scale-110 shadow-yellow-400/50';
+      baseClass += ' ring-2 sm:ring-4 ring-yellow-400 transform scale-105 sm:scale-110 shadow-yellow-400/50';
     } else {
       baseClass += ' hover:scale-105';
     }

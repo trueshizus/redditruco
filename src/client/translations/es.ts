@@ -50,11 +50,35 @@ export const es = {
       valeCuatro: "Vale Cuatro",
       quiero: "Quiero",
       noQuiero: "No Quiero",
-      mazo: "Mazo"
+      mazo: "Mazo",
+      continue: "Continuar"
     }
   },
   betting: {
     called: (player: string, bet: string, points: number) => `${player} cantó: ${bet.replace('_', ' ').toUpperCase()}(${points} pts)`,
     handWinner: (player: string) => `Ganador de la Mano: ${player}`
+  },
+  logs: {
+    title: "Registro de Partida",
+    gameInitialized: "Juego inicializado",
+    roundBegins: (round: number) => `Ronda ${round} comienza`,
+    cardsDealt: "Cartas repartidas a los jugadores",
+    cardPlayed: (player: string, card: string) => `${player} juega ${card}`,
+    trickWon: (player: string, trick: number) => `${player} gana la baza ${trick}`,
+    trickTied: (trick: number) => `Baza ${trick} está empatada (parda)`,
+    envidoCalled: (player: string, points: number) => `${player} canta Envido (${points} pts)`,
+    realEnvidoCalled: (player: string, points: number) => `${player} canta Real Envido (${points} pts)`,
+    faltaEnvidoCalled: (player: string, points: number) => `${player} canta Falta Envido (${points} pts)`,
+    trucoCalled: (player: string, points: number) => `${player} canta Truco (${points} pts)`,
+    retrucoCalled: (player: string, points: number) => `${player} canta Retruco (${points} pts)`,
+    valeCuatroCalled: (player: string, points: number) => `${player} canta Vale Cuatro (${points} pts)`,
+    envidoAccepted: (winner: string, p1Points: number, p2Points: number, stake: number) => `Envido aceptado. Jugador 1: ${p1Points}, Jugador 2: ${p2Points}. ${winner} gana ${stake} pts`,
+    envidoDeclined: (winner: string) => `Envido rechazado. ${winner} anota 1 punto`,
+    trucoAccepted: (stake: number) => `Truco aceptado. Ronda vale ${stake} puntos`,
+    trucoDeclined: (winner: string, points: number) => `Truco rechazado. ${winner} gana ${points} puntos`,
+    roundComplete: (winner: string) => `Ronda completa. ¡${winner} gana!`,
+    gameOver: (winner: string) => `¡Juego terminado! ¡${winner} gana la partida!`,
+    newRound: "--- Empezando nueva ronda ---",
+    goesToDeck: (player: string, winner: string) => `${player} se va al mazo. ¡${winner} gana la ronda!`
   }
 };

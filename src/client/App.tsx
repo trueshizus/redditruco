@@ -1,29 +1,28 @@
 import { useMachine } from '@xstate/react';
-import { Player } from './components/Player';
 import { Board } from './components/Board';
-import { gameStateMachine, gameActions } from './machines/gameStateMachine';
+import { OpponentStatusBar } from './components/OpponentStatusBar';
+import { OpponentDebugPanel } from './components/OpponentDebugPanel';
+import { PlayerSection } from './components/PlayerSection';
+import { SlidingResponseOverlay } from './components/SlidingResponseOverlay';
 import { useTranslation } from './hooks/useTranslation';
 
+
+
 export const App = () => {
-  const [state, send] = useMachine(gameStateMachine);
+  const [state, send] = useMachine();
   const { t, language, setLanguage } = useTranslation();
 
-  // Use cards from state machine context instead of hardcoded values
-  const user1Cards = state.context.cards[0];
-  const user2Cards = state.context.cards[1];
+  // Use cards from state machine context instead of hardcoded values  
+  const user1Cards = state.context.player.hand;
+  const user2Cards = state.context.adversary.hand;
 
   const handleCardSelect = (cardId: string) => {
-    send({ type: 'SELECT_CARD', cardId });
+    // In the new state machine, we play cards directly
+    send({ type: 'PLAY_CARD', cardId });
   };
 
   const handleCardToggleFlip = (cardId: string) => {
-    send({ type: 'FLIP_CARD', cardId });
-  };
-
-  const handlePlayCard = () => {
-    if (state.context.selectedCardId) {
-      send({ type: 'PLAY_CARD' });
-    }
+    // Card flipping is removed from the new state machine for simplicity
   };
 
   const handleStartGame = () => {
@@ -31,170 +30,191 @@ export const App = () => {
   };
 
   const handleStartNewHand = () => {
-    send({ type: 'START_NEW_HAND' });
+    send({ type: 'NEXT_ROUND' });
   };
 
-  // Button handlers
-  const handleEnvido = () => send({ type: 'ENVIDO' });
-  const handleRealEnvido = () => send({ type: 'REAL_ENVIDO' });
-  const handleFaltaEnvido = () => send({ type: 'FALTA_ENVIDO' });
-  const handleTruco = () => send({ type: 'TRUCO' });
-  const handleRetruco = () => send({ type: 'RETRUCO' });
-  const handleValeCuatro = () => send({ type: 'VALE_CUATRO' });
+  const handleContinue = () => {
+    send({ type: 'CONTINUE' });
+  };
+
+  // Button handlers - updated event names for new state machine
+  const handleEnvido = () => send({ type: 'CALL_ENVIDO' });
+  const handleRealEnvido = () => send({ type: 'CALL_REAL_ENVIDO' });
+  const handleFaltaEnvido = () => send({ type: 'CALL_FALTA_ENVIDO' });
+  const handleTruco = () => send({ type: 'CALL_TRUCO' });
   const handleQuiero = () => send({ type: 'QUIERO' });
   const handleNoQuiero = () => send({ type: 'NO_QUIERO' });
   const handleMazo = () => send({ type: 'MAZO' });
 
-  // Use helper functions to determine button availability
-  const canCallEnvido = gameActions.canCallEnvido(state.context);
-  const canCallTruco = gameActions.canCallTruco(state.context);
-  const canCallRetruco = gameActions.canCallRetruco(state.context);
-  const canCallValeCuatro = gameActions.canCallValeCuatro(state.context);
+  // Use proper validation logic from state machine
+  const canCallEnvidoValidation = canCallEnvido(
+    state.context.board.currentTrick,
+    state.context.tricks[0]?.player1Card || null,
+    state.context.tricks[0]?.player2Card || null,
+    state.context.envidoCalled,
+    state.context.trucoState,
+    state.context.trucoCalledThisRound,
+    state.context.gameState
+  );
   
+  const canCallTruco = state.context.gameState === 'playing' && 
+                      state.context.trucoState === 'none' &&
+                      state.context.roundStake === 1;
+  
+  const canCallMazo = state.context.gameState === 'playing';
+
   // Check if players can respond to bets
-  const canPlayer1Respond = gameActions.canRespond(state.context, 0);
-  const canPlayer2Respond = gameActions.canRespond(state.context, 1);
+  const canRespond = state.context.awaitingResponse;
+
+  // Determine player status text
+  const getPlayerStatusText = () => {
+    if (state.context.currentTurn === 0) return 'Your turn';
+    if (canRespond && state.context.betInitiator !== 0) return 'Respond to bet';
+    return 'Waiting...';
+  };
 
   return (
-    <main className="min-h-screen grid grid-rows-3 bg-gradient-to-b from-slate-800 to-slate-900">
-      {/* Top Player - Opponent */}
-      <Player
-        id={state.context.players[1]!.id}
-        cards={user2Cards}
-        selectedCardId={state.context.selectedCardId}
-        flippedCardId={state.context.flippedCardId}
-        onCardSelect={handleCardSelect}
-        onCardToggleFlip={handleCardToggleFlip}
-        isCurrentPlayer={state.context.currentTurn === 1}
-        onEnvido={handleEnvido}
-        onRealEnvido={handleRealEnvido}
-        onFaltaEnvido={handleFaltaEnvido}
-        onTruco={handleTruco}
-        onRetruco={handleRetruco}
-        onValeCuatro={handleValeCuatro}
+    <main className="app grid grid-cols-1 grid-rows-10 h-full bg-gradient-to-br from-emerald-900 via-green-800 to-emerald-900">
+      
+      {/* Section 1: Opponent Area (1 row) */}
+      <section className="h-full flex flex-col overflow-hidden">
+        <OpponentStatusBar
+          opponentName={state.context.adversary.name}
+          cardCount={user2Cards.length}
+          isOpponentTurn={state.context.currentTurn === 1}
+        />
+
+        <OpponentDebugPanel
+          isVisible={state.context.currentTurn === 1 || (canRespond && state.context.betInitiator === 0)}
+          opponentCards={state.context.currentTurn === 1 && state.context.gameState === 'playing' ? user2Cards : []}
+          canCallEnvido={state.context.currentTurn === 1 && canCallEnvidoValidation}
+          canCallTruco={state.context.currentTurn === 1 && canCallTruco}
+          canCallMazo={state.context.currentTurn === 1 && canCallMazo}
+          canRespond={canRespond && state.context.betInitiator === 0}
+          onPlayCard={(cardId) => send({ type: 'PLAY_CARD', cardId })}
+          onCallEnvido={handleEnvido}
+          onCallRealEnvido={handleRealEnvido}
+          onCallFaltaEnvido={handleFaltaEnvido}
+          onCallTruco={handleTruco}
+          onCallMazo={handleMazo}
+          onQuiero={handleQuiero}
+          onNoQuiero={handleNoQuiero}
+        />
+      </section>
+
+      {/* Section 2: Game Board (4 rows) */}
+      <section className="row-span-4 h-full flex flex-col overflow-hidden">
+        <Board
+          currentTrick={state.context.tricks[state.context.board.currentTrick]!}
+          trickNumber={state.context.board.currentTrick}
+          tricks={state.context.tricks}
+          cardsInPlay={state.context.board.cardsInPlay || { player: null, adversary: null }}
+          logs={state.context.logs || []}
+          playerScore={state.context.player.score}
+          adversaryScore={state.context.adversary.score}
+          envidoState={state.context.envidoState}
+          trucoState={state.context.trucoState}
+          envidoStake={state.context.envidoStake}
+          roundStake={state.context.roundStake}
+          language={language}
+          setLanguage={setLanguage}
+        >
+          <div className="flex flex-col items-center space-y-4">
+            {state.value === 'idle' && (
+              <div className="text-center">
+                <div className="text-yellow-100 text-lg font-medium mb-4">Ready to Play Truco?</div>
+                <button
+                  onClick={handleStartGame}
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105"
+                >
+                  🎴 Start Game
+                </button>
+              </div>
+            )}
+            {state.value === 'trick_complete' && (
+              <div className="text-center space-y-4">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4">
+                  <div className="text-yellow-100 text-lg font-bold">
+                    {state.context.board.trickWinner !== null 
+                      ? `🏆 ${state.context.board.trickWinner === 0 ? 'You' : 'Opponent'} won the trick!`
+                      : "🤝 Trick Tied (Parda)"}
+                  </div>
+                </div>
+                <button
+                  onClick={handleContinue}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-3 rounded-lg text-base font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  Continue →
+                </button>
+              </div>
+            )}
+            {state.value === 'round_complete' && (
+              <div className="text-center space-y-4">
+                <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg p-4">
+                  <div className="text-yellow-100 text-lg font-bold">
+                    🎉 Round Winner: {state.context.roundWinner === 0 ? 'You!' : 'Opponent'}
+                  </div>
+                </div>
+                <button
+                  onClick={handleStartNewHand}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6 py-3 rounded-lg text-base font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  Next Round →
+                </button>
+              </div>
+            )}
+            {state.value === 'game_over' && (
+              <div className="text-center space-y-4">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-6">
+                  <div className="text-2xl font-bold text-yellow-300 mb-2">🎊 Game Over!</div>
+                  <div className="text-lg text-yellow-200 mb-2">
+                    Winner: {state.context.gameWinner === 0 ? 'You!' : 'Opponent'}
+                  </div>
+                  <div className="text-yellow-300">
+                    Final Score: {state.context.player.score} - {state.context.adversary.score}
+                  </div>
+                </div>
+                <button
+                  onClick={() => send({ type: 'RESTART_GAME' })}
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl transition-all duration-200 transform hover:scale-105"
+                >
+                  🎴 Play Again
+                </button>
+              </div>
+            )}
+          </div>
+        </Board>
+      </section>
+
+      {/* Section 3: Player Area (5 rows) */}
+      <section className="row-span-5 h-full flex flex-col overflow-hidden">
+        
+          <PlayerSection
+            playerName={state.context.player.name}
+            playerCards={user1Cards}
+            isPlayerTurn={state.context.currentTurn === 0}
+            canRespond={canRespond}
+            betInitiator={state.context.betInitiator}
+            statusText={getPlayerStatusText()}
+            canCallEnvido={canCallEnvidoValidation}
+            canCallTruco={canCallTruco}
+            canCallMazo={canCallMazo}
+            onCardSelect={handleCardSelect}
+            onCardToggleFlip={handleCardToggleFlip}
+            onEnvido={handleEnvido}
+            onRealEnvido={handleRealEnvido}
+            onFaltaEnvido={handleFaltaEnvido}
+            onTruco={handleTruco}
+            onMazo={handleMazo}
+          />
+        
+      </section>
+
+      {/* Sliding Response Overlay - Positioned absolutely over the grid */}
+      <SlidingResponseOverlay
+        isVisible={canRespond && state.context.betInitiator !== 0}
         onQuiero={handleQuiero}
         onNoQuiero={handleNoQuiero}
-        onMazo={handleMazo}
-        canCallEnvido={canCallEnvido && state.context.currentTurn === 1}
-        canCallTruco={canCallTruco && state.context.currentTurn === 1}
-        canRespond={canRespond && state.context.betInitiator !== 1}
-      />
-
-      {/* Middle Board - this will grow */}
-      <Board
-        currentTrick={state.context.tricks[state.context.currentTrick]!}
-        trickNumber={state.context.currentTrick}
-        tricks={state.context.tricks}
-      >
-        <div className="text-center space-y-2">
-          {/* Language Switcher */}
-          <div className="flex justify-center gap-2 mb-2">
-            <button 
-              onClick={() => setLanguage('en')}
-              className={`px-2 py-1 text-xs rounded ${language === 'en' ? 'bg-yellow-600 text-white' : 'bg-yellow-200 text-black'}`}
-            >
-              EN
-            </button>
-            <button 
-              onClick={() => setLanguage('es')}
-              className={`px-2 py-1 text-xs rounded ${language === 'es' ? 'bg-yellow-600 text-white' : 'bg-yellow-200 text-black'}`}
-            >
-              ES
-            </button>
-          </div>
-          <div className="text-xs text-yellow-400 font-mono">
-            {t.game.info.matchId}: {state.context.matchId}
-          </div>
-          <div>Game State: {String(state.value)}</div>
-          <div>
-            {t.game.info.currentTurn}: {state.context.players[state.context.currentTurn]?.name || 'Unknown'}
-          </div>
-          <div>
-            {t.game.info.score}: {state.context.score[0]} - {state.context.score[1]}
-          </div>
-          <div className="text-sm text-yellow-200">
-            {t.game.info.dealer}: {state.context.players[state.context.dealer]?.name} | {t.game.info.mano}:{' '}
-            {state.context.players[state.context.mano]?.name}
-          </div>
-          <div className="text-xs text-yellow-300">
-            {t.game.info.cardsDealt(state.context.cards[0].length + state.context.cards[1].length, 6)}
-          </div>
-          {state.context.currentBet !== 'none' && (
-            <div className="text-sm text-orange-200 bg-orange-900/50 px-2 py-1 rounded">
-              {t.betting.called(
-                state.context.players[state.context.betInitiator!]?.name || '',
-                state.context.currentBet,
-                state.context.currentBet.includes('envido') ? state.context.betPoints : state.context.handValue
-              )}
-            </div>
-          )}
-          {state.context.selectedCardId && state.value === 'playing' && (
-            <button
-              onClick={handlePlayCard}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              {t.actions.buttons.playCard}
-            </button>
-          )}
-          {state.value === 'idle' && (
-            <button
-              onClick={handleStartGame}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {t.actions.buttons.startGame}
-            </button>
-          )}
-          {state.value === 'hand_complete' && (
-            <div className="space-y-2">
-              <div className="text-lg font-bold text-yellow-300">
-                {t.betting.handWinner(state.context.players[state.context.handWinner!]?.name || '')}
-              </div>
-              <button
-                onClick={handleStartNewHand}
-                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-              >
-                {t.actions.buttons.startNewHand}
-              </button>
-            </div>
-          )}
-          {state.value === 'finished' && (
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-yellow-300">{t.game.winner.gameOver}</div>
-              <div className="text-lg text-yellow-200">
-                {t.game.winner.winner}:{' '}
-                {state.context.score[0] >= 30
-                  ? state.context.players[0]?.name
-                  : state.context.players[1]?.name}
-              </div>
-              <div className="text-sm text-yellow-300">
-                {t.game.winner.finalScore}: {state.context.score[0]} - {state.context.score[1]}
-              </div>
-            </div>
-          )}
-        </div>
-      </Board>
-
-      {/* Bottom Player - You */}
-      <Player
-        id={state.context.players[0]!.id}
-        cards={user1Cards}
-        selectedCardId={state.context.selectedCardId}
-        flippedCardId={state.context.flippedCardId}
-        onCardSelect={handleCardSelect}
-        onCardToggleFlip={handleCardToggleFlip}
-        isCurrentPlayer={state.context.currentTurn === 0}
-        onEnvido={handleEnvido}
-        onRealEnvido={handleRealEnvido}
-        onFaltaEnvido={handleFaltaEnvido}
-        onTruco={handleTruco}
-        onRetruco={handleRetruco}
-        onValeCuatro={handleValeCuatro}
-        onQuiero={handleQuiero}
-        onNoQuiero={handleNoQuiero}
-        onMazo={handleMazo}
-        canCallEnvido={canCallEnvido && state.context.currentTurn === 0}
-        canCallTruco={canCallTruco && state.context.currentTurn === 0}
-        canRespond={canRespond && state.context.betInitiator !== 0}
       />
     </main>
   );
