@@ -12,8 +12,8 @@ Reddit Truco is a Devvit (Reddit) app that plays the Argentine card game *Truco*
 - `npm run dev:vite` — standalone Vite dev server on port 7474 for pure frontend work without Devvit.
 - `npm run build` — builds client then server into `dist/client` and `dist/server` (the artifacts `devvit.json` points at).
 - `npm run check` — runs `tsc --build`, `eslint --fix`, then `prettier --write`. Use this before committing.
-- `npm test` — Vitest only (`test/game.test.ts`, asserts against the machine at `src/client/machines/gameStateMachine.ts`). Run a single test with `npx vitest run test/game.test.ts -t "should start a new round"`.
-- `npx playwright test` — E2E suite in `test/playwright/*.spec.ts`. `playwright.config.ts` auto-starts `npm run dev:vite` on `localhost:7474` via its `webServer` block, so you don't need to run the dev server separately. Not wired into `npm test`.
+- `npm test` — Vitest. `vitest.config.ts` excludes `test/playwright/**`. Single test: `npx vitest run test/game.test.ts -t "should create a new game"`.
+- `npx playwright test` — E2E suite in `test/playwright/*.spec.ts`. `playwright.config.ts` auto-starts `npm run dev:vite` on `localhost:7474` via its `webServer` block, so you don't need to run the dev server separately. **Not wired into `npm test`** — run explicitly. ⚠ These specs were authored against a prior UI/state shape and may not all pass; treat as a work-in-progress suite until audited.
 - `npm run generate:cards` — regenerates the 40 Spanish-deck SVGs in `src/client/public/cards/` via `utils/generate-svg-cards.js`.
 - `npm run deploy` / `npm run launch` — `devvit upload` / `devvit upload && devvit publish`. Requires `npm run login` first.
 
@@ -21,30 +21,27 @@ Playtest target (set in `devvit.json` → `dev.subreddit`): `r/reditruco_dev` (p
 
 ## Architecture
 
-Three TypeScript project references under `src/`, each with its own `tsconfig.json` and `vite.config.ts`, composed by the root `tsconfig.json`:
+Four TypeScript project references under `src/`, each with its own `tsconfig.json`, composed by the root `tsconfig.json`:
 
 - **`src/client/`** — React 19 + Tailwind 4 webview, built by Vite into `dist/client`. Served as a static bundle by Devvit. Communicates with the server by calling `fetch('/api/...')`. Entry: `main.tsx` → `App.tsx`.
 - **`src/server/`** — Express 5 app built by Vite into `dist/server/index.cjs`. Runs on Devvit's serverless runtime. Entry: `src/server/index.ts`. Boots via `createServer(app)` + `getServerPort()` from `@devvit/web/server`.
 - **`src/shared/`** — types shared across client and server (e.g. `shared/types/api.ts`). Referenced by both tsconfigs.
+- **`src/machines/truco/`** — pure game logic, referenced by the client.
 
-### State machine — two implementations coexist
+### Truco state machine
 
-There are currently **two parallel XState v5 machines** for Truco rules. When making changes, know which one you're touching.
+All game rules live in a modular XState v5 machine under `src/machines/truco/`. `App.tsx` consumes it via `useMachine(trucoStateMachine)`.
 
-1. **`src/client/machines/gameStateMachine.ts`** — the monolithic (~800-line) machine that is **actually wired into the app**. `App.tsx` consumes it via `useMachine(gameStateMachine)`, and `test/game.test.ts` (Vitest) asserts against it. This is the source of truth for runtime behavior today.
+- **`trucoST.ts`** — the machine itself. States: `idle → dealing → playing → envido_betting | truco_betting → trick_complete → round_complete → game_over`. First to 30 points wins.
+- **`types.ts`** — `GameContext`, `TrucoEvent`, `Player`, `Trick`, `Board`, `EnvidoBet`, `TrucoBet`, `TrucoState`. The `GameContext` shape is player/adversary (objects, not arrays), `board.cardsInPlay.{player,adversary}`, `board.currentTrick`, `tricks: [Trick, Trick, Trick]`, plus `trucoState`, `envidoState`, `roundStake`, `envidoStake`, `betInitiator`, `awaitingResponse`.
+- **`deck.ts`** — Spanish deck generation (`generateFullDeck`), seeded Fisher-Yates shuffle (`shuffleDeck`), `dealCards`, `generateMatchId`. Cards are `NN_S` strings (no `.svg`).
+- **`cardRules.ts`** — `CARD_HIERARCHY`, `compareCards`, `getCardValue`, `getCardSuit`, `isCartaBrava`. ⚠ Known deviation from real Truco: the hierarchy sub-orders cards of the same rank by suit, so two 3s are not parda. Any gameplay fix should update the hierarchy or the comparator.
+- **`envido.ts`** — `calculateEnvidoPoints` (same-suit pair = top two values + 20; face cards 10/11/12 = 0), `resolveEnvido`, `canCallEnvido` (guard used in both the machine and `App.tsx`).
+- **`tricks.ts`** — `resolveTrick`, `determineRoundWinner`, `getNextTrickLeader` with "primera vale doble" tie handling.
+- **`index.ts`** — public entry point (barrel re-exports).
+- **`test.ts`** — hand-rolled debug script (not a Vitest file). Excluded from the tsconfig build.
 
-2. **`src/machines/truco/`** — a newer **modular rewrite** broken into `trucoST.ts` (state machine), `deck.ts`, `cardRules.ts`, `envido.ts`, `tricks.ts`, `types.ts`, `index.ts`. Exports `trucoStateMachine`. Has its own `README.md` and a standalone `test.ts`. **Not yet imported by `App.tsx` or the Vitest suite** — it's a migration target, not live code. Before deleting the old machine, migrate `App.tsx`, port `test/game.test.ts`, and confirm the Playwright suite still passes.
-
-Shared concepts (apply to both):
-
-- **Spanish deck** — 40 cards as `NN_S` / `NN_S.svg` strings (suits E/B/C/O, ranks 1–7, 10–12).
-- **Card hierarchy** — `01_E` (As de Espadas, highest) down through the *cartas bravas* (`01_B`, `07_E`, `07_O`) to `04_*`. The old machine has `CARD_HIERARCHY` + `compareCards` inline; the new one moves it to `cardRules.ts`.
-- **Envido** — same-suit pairs = top two values + 20; otherwise the single highest card value; face cards (10/11/12) count as 0. Old machine: `calculateEnvidoPoints` inline. New machine: `envido.ts`.
-- **`gameActions`** (old machine only) — exported helper object (`canCallEnvido`, `canCallTruco`, `canCallRetruco`, `canCallValeCuatro`, `canRespond`, `canPlayCard`). `App.tsx` calls these to gate UI buttons.
-- **State graph** — old: `idle → playing → envido_betting | truco_betting → playing → hand_complete → finished`. New: adds an explicit `dealing` state and `round_complete`/`game_over`. First to 30 points either way.
-- **Seeded shuffle** — both use a deterministic LCG keyed by `matchId`/`seed`, so a match ID fully reproduces a deal. Useful for tests and any future server-authoritative rewrite.
-
-`test/game.test.ts` demonstrates the BDD-style shape (Given/When/Then with `createActor`) against the old machine. The new machine has its own ad-hoc `test.ts` that isn't picked up by Vitest.
+The canonical Vitest suite is `test/game.test.ts` — it runs against `trucoStateMachine` and exercises initialization, dealing, card hierarchy, envido calc, and envido/truco flows.
 
 ### Server is currently a stub
 
@@ -64,9 +61,8 @@ Translations live in `src/client/translations/{en,es}.ts` behind the `useTransla
 
 ### Testing
 
-- **Vitest** (`test/game.test.ts`) — unit tests driving the old `gameStateMachine` via `createActor`. `npm test` runs this.
-- **Playwright** (`test/playwright/01-basic-game-flow.spec.ts` through `12-edge-cases.spec.ts`, plus `gameState.test.ts`) — E2E suite. Runs against the Vite dev server at `localhost:7474`, which `playwright.config.ts` auto-starts. Invoke with `npx playwright test`. **Not part of `npm test`**; run it explicitly or add it to CI.
-- The modular `src/machines/truco/test.ts` is a hand-rolled script, not a Vitest file. Don't confuse it with the real suite.
+- **Vitest** (`test/game.test.ts`) — drives `trucoStateMachine` via `createActor`. `npm test` runs this. `vitest.config.ts` uses `include: test/**/*.test.ts` and excludes `test/playwright/**` so Playwright specs don't get picked up by Vitest.
+- **Playwright** (`test/playwright/*.spec.ts`) — E2E suite. Runs against the Vite dev server on `localhost:7474`, auto-started by `playwright.config.ts`. Invoke with `npx playwright test`. Not part of `npm test`.
 
 ### Card assets
 

@@ -4,49 +4,38 @@ import { OpponentStatusBar } from './components/OpponentStatusBar';
 import { OpponentDebugPanel } from './components/OpponentDebugPanel';
 import { PlayerSection } from './components/PlayerSection';
 import { SlidingResponseOverlay } from './components/SlidingResponseOverlay';
+import { trucoStateMachine, canCallEnvido } from '../machines/truco';
 import { useTranslation } from './hooks/useTranslation';
 
-
-
 export const App = () => {
-  const [state, send] = useMachine();
-  const { t, language, setLanguage } = useTranslation();
+  const [state, send] = useMachine(trucoStateMachine);
+  const { language, setLanguage } = useTranslation();
 
-  // Use cards from state machine context instead of hardcoded values  
   const user1Cards = state.context.player.hand;
   const user2Cards = state.context.adversary.hand;
 
   const handleCardSelect = (cardId: string) => {
-    // In the new state machine, we play cards directly
     send({ type: 'PLAY_CARD', cardId });
   };
 
-  const handleCardToggleFlip = (cardId: string) => {
-    // Card flipping is removed from the new state machine for simplicity
+  const handleCardToggleFlip = (_cardId: string) => {
+    // Card flipping is not modeled in the Truco state machine.
   };
 
-  const handleStartGame = () => {
-    send({ type: 'START_GAME' });
-  };
+  const handleStartGame = () => send({ type: 'START_GAME' });
+  const handleStartNewHand = () => send({ type: 'NEXT_ROUND' });
+  const handleContinue = () => send({ type: 'CONTINUE' });
 
-  const handleStartNewHand = () => {
-    send({ type: 'NEXT_ROUND' });
-  };
-
-  const handleContinue = () => {
-    send({ type: 'CONTINUE' });
-  };
-
-  // Button handlers - updated event names for new state machine
   const handleEnvido = () => send({ type: 'CALL_ENVIDO' });
   const handleRealEnvido = () => send({ type: 'CALL_REAL_ENVIDO' });
   const handleFaltaEnvido = () => send({ type: 'CALL_FALTA_ENVIDO' });
   const handleTruco = () => send({ type: 'CALL_TRUCO' });
+  const handleRetruco = () => send({ type: 'CALL_RETRUCO' });
+  const handleValeCuatro = () => send({ type: 'CALL_VALE_CUATRO' });
   const handleQuiero = () => send({ type: 'QUIERO' });
   const handleNoQuiero = () => send({ type: 'NO_QUIERO' });
   const handleMazo = () => send({ type: 'MAZO' });
 
-  // Use proper validation logic from state machine
   const canCallEnvidoValidation = canCallEnvido(
     state.context.board.currentTrick,
     state.context.tricks[0]?.player1Card || null,
@@ -91,6 +80,7 @@ export const App = () => {
           canCallTruco={state.context.currentTurn === 1 && canCallTruco}
           canCallMazo={state.context.currentTurn === 1 && canCallMazo}
           canRespond={canRespond && state.context.betInitiator === 0}
+          trucoState={state.context.trucoState}
           onPlayCard={(cardId) => send({ type: 'PLAY_CARD', cardId })}
           onCallEnvido={handleEnvido}
           onCallRealEnvido={handleRealEnvido}
@@ -99,6 +89,8 @@ export const App = () => {
           onCallMazo={handleMazo}
           onQuiero={handleQuiero}
           onNoQuiero={handleNoQuiero}
+          onRetruco={handleRetruco}
+          onValeCuatro={handleValeCuatro}
         />
       </section>
 
@@ -109,7 +101,6 @@ export const App = () => {
           trickNumber={state.context.board.currentTrick}
           tricks={state.context.tricks}
           cardsInPlay={state.context.board.cardsInPlay || { player: null, adversary: null }}
-          logs={state.context.logs || []}
           playerScore={state.context.player.score}
           adversaryScore={state.context.adversary.score}
           envidoState={state.context.envidoState}
@@ -193,8 +184,6 @@ export const App = () => {
             playerName={state.context.player.name}
             playerCards={user1Cards}
             isPlayerTurn={state.context.currentTurn === 0}
-            canRespond={canRespond}
-            betInitiator={state.context.betInitiator}
             statusText={getPlayerStatusText()}
             canCallEnvido={canCallEnvidoValidation}
             canCallTruco={canCallTruco}

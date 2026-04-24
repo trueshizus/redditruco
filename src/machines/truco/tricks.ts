@@ -68,18 +68,18 @@ function resolveTie(mano: number, trickNumber: number, previousTricks: Trick[]):
  */
 export function determineRoundWinner(tricks: [Trick, Trick, Trick], mano: number): TrickResult {
   // Count wins for each player
-  const wins = [0, 0]; // [player1Wins, player2Wins]
+  const wins: [number, number] = [0, 0]; // [player1Wins, player2Wins]
   let completedTricks = 0;
-  
+
   tricks.forEach((trick) => {
     if (trick.player1Card && trick.player2Card) {
       completedTricks++;
       if (trick.winner !== null) {
-        wins[trick.winner]++;
+        wins[trick.winner as 0 | 1]++;
       }
     }
   });
-  
+
   // Check for immediate winner (2 out of 3 tricks)
   if (wins[0] >= 2) {
     return { winner: 0, roundComplete: true, roundWinner: 0 };
@@ -103,17 +103,17 @@ export function determineRoundWinner(tricks: [Trick, Trick, Trick], mano: number
  * This handles complex tie scenarios
  */
 function determineComplexRoundWinner(tricks: [Trick, Trick, Trick], mano: number): number | null {
-  const wins = [0, 0];
+  const wins: [number, number] = [0, 0];
   let ties = 0;
-  
+
   tricks.forEach((trick) => {
     if (trick.winner !== null) {
-      wins[trick.winner]++;
+      wins[trick.winner as 0 | 1]++;
     } else {
       ties++;
     }
   });
-  
+
   // If one player has more wins, they win the round
   if (wins[0] > wins[1]) return 0;
   if (wins[1] > wins[0]) return 1;
@@ -178,12 +178,12 @@ export function getTrickCards(trick: Trick): { player1Card: Card | null, player2
  */
 export function countTrickWins(tricks: Trick[]): [number, number] {
   const wins: [number, number] = [0, 0];
-  
+
   tricks.forEach(trick => {
     if (trick.winner !== null) {
-      wins[trick.winner]++;
+      wins[trick.winner as 0 | 1]++;
     }
   });
-  
+
   return wins;
 }

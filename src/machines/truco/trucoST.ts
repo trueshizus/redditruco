@@ -2,10 +2,10 @@
 // Based on PDF specification for Argentinian Truco game backend
 
 import { createMachine, assign } from 'xstate';
-import type { GameContext, TrucoEvent, Card, EnvidoBet, TrucoBet, Trick } from './types.js';
+import type { GameContext, TrucoEvent, EnvidoBet, TrucoBet, Trick } from './types.js';
 import { createShuffledDeck, dealCards, generateMatchId } from './deck.js';
-import { createEmptyTrick, determineRoundWinner, resolveTrick, getNextTrickLeader, isTrickComplete } from './tricks.js';
-import { calculateEnvidoPoints, resolveEnvido, canCallEnvido } from './envido.js';
+import { createEmptyTrick, determineRoundWinner, resolveTrick, getNextTrickLeader } from './tricks.js';
+import { resolveEnvido, canCallEnvido } from './envido.js';
 
 // Create initial game context
 function createInitialContext(seed?: string): GameContext {

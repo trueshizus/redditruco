@@ -1,5 +1,4 @@
-import React from 'react';
-import { useTranslation } from '../hooks/useTranslation';
+import type { ReactNode } from 'react';
 
 interface Trick {
   player1Card: string | null;
@@ -8,7 +7,7 @@ interface Trick {
 }
 
 interface BoardProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   currentTrick: Trick;
   trickNumber: number;
   tricks: [Trick, Trick, Trick];
@@ -16,7 +15,6 @@ interface BoardProps {
     player: string | null;
     adversary: string | null;
   };
-  logs: string[];
   playerScore: number;
   adversaryScore: number;
   envidoState: 'none' | 'envido' | 'real_envido' | 'falta_envido';
@@ -27,24 +25,21 @@ interface BoardProps {
   setLanguage: (lang: 'en' | 'es') => void;
 }
 
-export const Board = ({ 
-  children, 
-  currentTrick, 
-  trickNumber, 
-  tricks, 
-  cardsInPlay, 
-  logs, 
-  playerScore, 
-  adversaryScore, 
-  envidoState, 
-  trucoState, 
-  envidoStake, 
-  roundStake, 
-  language, 
-  setLanguage 
+export const Board = ({
+  children,
+  currentTrick,
+  trickNumber,
+  tricks,
+  cardsInPlay,
+  playerScore,
+  adversaryScore,
+  envidoState,
+  trucoState,
+  envidoStake,
+  roundStake,
+  language,
+  setLanguage,
 }: BoardProps) => {
-  const { t } = useTranslation();
-
   return (
     <div className="h-full flex flex-col relative bg-gradient-to-br from-emerald-900/40 to-green-900/40 backdrop-blur-sm">
       

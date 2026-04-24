@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface OpponentStatusBarProps {
   opponentName: string;
   cardCount: number;

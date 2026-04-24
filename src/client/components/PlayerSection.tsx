@@ -1,19 +1,16 @@
-import React from 'react';
 import { Card } from './Card';
 
 interface PlayerSectionProps {
   playerName: string;
   playerCards: string[];
   isPlayerTurn: boolean;
-  canRespond: boolean;
-  betInitiator: number | null;
   statusText: string;
-  
+
   // Action availability
   canCallEnvido: boolean;
   canCallTruco: boolean;
   canCallMazo: boolean;
-  
+
   // Action handlers
   onCardSelect: (cardId: string) => void;
   onCardToggleFlip: (cardId: string) => void;
@@ -28,8 +25,6 @@ export const PlayerSection = ({
   playerName,
   playerCards,
   isPlayerTurn,
-  canRespond,
-  betInitiator,
   statusText,
   canCallEnvido,
   canCallTruco,

@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface SlidingResponseOverlayProps {
   isVisible: boolean;
   onQuiero: () => void;
