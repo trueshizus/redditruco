@@ -170,7 +170,7 @@ export const App = () => {
                       ? t.trick.parda
                       : state.context.board.trickWinner === 0
                       ? t.trick.youWon
-                      : t.trick.opponentWon}
+                      : t.trick.opponentWon(t.common.opponent)}
                   </div>
                 </div>
                 <button

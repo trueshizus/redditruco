@@ -29,7 +29,7 @@ export const es = {
   },
   trick: {
     youWon: '🏆 ¡Te la llevaste!',
-    opponentWon: '🏆 Se la llevó el rival',
+    opponentWon: (name: string) => `🏆 Tanto para ${name}`,
     parda: '🤝 Parda',
     continue: 'Seguir →',
   },

@@ -21,7 +21,7 @@ export const en = {
   },
   trick: {
     youWon: '🏆 You won the trick!',
-    opponentWon: '🏆 Opponent won the trick!',
+    opponentWon: (name: string) => `🏆 Point for ${name}`,
     parda: '🤝 Trick Tied (Parda)',
     continue: 'Continue →',
   },
