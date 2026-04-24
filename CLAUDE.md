@@ -30,18 +30,30 @@ Four TypeScript project references under `src/`, each with its own `tsconfig.jso
 
 ### Truco state machine
 
-All game rules live in a modular XState v5 machine under `src/machines/truco/`. `App.tsx` consumes it via `useMachine(trucoStateMachine)`.
+All rules live in a modular XState v5 machine under `src/machines/truco/`. `App.tsx` consumes it via `useMachine(trucoStateMachine)`. The machine implements 1v1 Argentine Truco per pagat.com + Wikipedia.
 
-- **`trucoST.ts`** — the machine itself. States: `idle → dealing → playing → envido_betting | truco_betting → trick_complete → round_complete → game_over`. First to 30 points wins.
-- **`types.ts`** — `GameContext`, `TrucoEvent`, `Player`, `Trick`, `Board`, `EnvidoBet`, `TrucoBet`, `TrucoState`. The `GameContext` shape is player/adversary (objects, not arrays), `board.cardsInPlay.{player,adversary}`, `board.currentTrick`, `tricks: [Trick, Trick, Trick]`, plus `trucoState`, `envidoState`, `roundStake`, `envidoStake`, `betInitiator`, `awaitingResponse`.
-- **`deck.ts`** — Spanish deck generation (`generateFullDeck`), seeded Fisher-Yates shuffle (`shuffleDeck`), `dealCards`, `generateMatchId`. Cards are `NN_S` strings (no `.svg`).
-- **`cardRules.ts`** — `CARD_HIERARCHY`, `compareCards`, `getCardValue`, `getCardSuit`, `isCartaBrava`. ⚠ Known deviation from real Truco: the hierarchy sub-orders cards of the same rank by suit, so two 3s are not parda. Any gameplay fix should update the hierarchy or the comparator.
-- **`envido.ts`** — `calculateEnvidoPoints` (same-suit pair = top two values + 20; face cards 10/11/12 = 0), `resolveEnvido`, `canCallEnvido` (guard used in both the machine and `App.tsx`).
-- **`tricks.ts`** — `resolveTrick`, `determineRoundWinner`, `getNextTrickLeader` with "primera vale doble" tie handling.
-- **`index.ts`** — public entry point (barrel re-exports).
-- **`test.ts`** — hand-rolled debug script (not a Vitest file). Excluded from the tsconfig build.
+- **`trucoST.ts`** — the machine. States: `idle → dealing → playing ↔ envido_betting | truco_betting → trick_complete → round_complete → game_over`. First to `targetScore` (30) wins.
+- **`types.ts`** — context shape. Key fields beyond the obvious: `trucoHolder` (who can raise next, = last accepter), `envidoAcceptedStake` (for correct NO_QUIERO refunds during a chain), `trickLeaders` (who led each trick, used for parda continuation), `trucoCalledThisRound` (locks out envido once truco enters a round), `betInitiator` + `awaitingResponse` (who's being responded to).
+- **`cardRules.ts`** — rank-based comparator. **Only the 4 cartas bravas are suit-distinct** (`01_E > 01_B > 07_E > 07_O`); every other same-rank pair is **parda** (tie). Uses a `CARD_RANK` map internally — do not use `indexOf(CARD_HIERARCHY)` for strength comparisons.
+- **`envido.ts`** — `calculateEnvidoPoints` (same-suit pair = top two values + 20; face cards 10–12 count as 0), `resolveEnvido`, and `canCallEnvido`. Envido window: first trick, before any card is played (including cards sitting on the board mid-trick), envido not yet resolved, truco not yet called this round.
+- **`tricks.ts`** — `resolveTrick`, `determineRoundWinner` (handles parda + "earlier trick wins" + "all pardas → mano"), `getNextTrickLeader` (winner leads next trick; parda → same leader continues).
+- **`deck.ts`** — Spanish 40-card generator, seeded Fisher–Yates shuffle, `dealCards`, `generateMatchId`. Cards are `NN_S` strings without `.svg`. The machine reshuffles per round with a seed of `${matchId}#${roundIdx}` for reproducibility.
+- **`index.ts`** — barrel re-exports.
 
-The canonical Vitest suite is `test/game.test.ts` — it runs against `trucoStateMachine` and exercises initialization, dealing, card hierarchy, envido calc, and envido/truco flows.
+**Betting semantics to know when editing:**
+- **Envido chain**: raising with Envido adds +2, Real Envido adds +3, Falta Envido sets stake to whatever wins the match. `envidoAcceptedStake` tracks the last implicitly-accepted value; NO_QUIERO awards that to the raiser (or 1 if it was the opening call).
+- **Truco chain**: Truco=2, Retruco=3, Vale Cuatro=4. On QUIERO, the accepter becomes `trucoHolder` and the round continues. Only the holder can escalate (`CALL_RETRUCO`/`CALL_VALE_CUATRO`) from `playing`; inside `truco_betting` the responder can counter-raise instead of answering. NO_QUIERO awards `max(roundStake - 1, 1)` to the caller.
+- **MAZO**: in `playing` awards `roundStake` to the opponent. In `envido_betting` it's "no quiero to envido + forfeit round" (opponent gets envido refusal points *and* the round stake). In `truco_betting` it's equivalent to NO_QUIERO.
+- **Point award path**: all paths award points inline (MAZO / NO_QUIERO / the final PLAY_CARD resolving the round). `round_complete.entry` only awards `roundStake` for the *natural trick-play* path (triggered by `CONTINUE` from `trick_complete`) and computes `gameWinner`. Do not also award in the handler that reaches `round_complete`, or you'll double-count.
+- **Response eligibility**: response guards (`QUIERO`/`NO_QUIERO`/raise in betting) only check `awaitingResponse`. The machine trusts the caller (UI) to send the event on the right player's behalf — 1v1 makes the responder unambiguous.
+
+**Test suite** (`test/game.test.ts`, Vitest): 36 tests covering card hierarchy (bravas + parda), trick resolution, envido calc, envido chains (accept & decline with refund), truco chain (truco → retruco → vale cuatro accept/decline), MAZO in all three contexts, round progression, dealer/mano rotation, game-over at 30, RESTART, and invalid-move rejection.
+
+**Known simplifications / not implemented:**
+- Flor (optional variant) — not modeled.
+- 2v2 / 4-player team play.
+- "Quiero" required before declaring a raise verbally — we treat the raise event as implicit acceptance of the prior level.
+- Response-side-identity is implicit (see "Response eligibility" above); a malicious client could send a response event pretending to be the other player. The webview trusts the send.
 
 ### Server is currently a stub
 

@@ -120,26 +120,35 @@ export function calculateEnvidoRefusalPoints(
 }
 
 /**
- * Check if envido can still be called in the current round
- * Envido can only be called when game is playing, before any card is played in the first trick,
- * and before Truco has been called in this round
+ * Whether envido can still be called this round.
+ *
+ * Rules (1v1 Argentine Truco):
+ *   - only during the playing state,
+ *   - only in the first trick,
+ *   - only before ANY card has been played this round (including a card sitting
+ *     on the board that hasn't yet completed the trick),
+ *   - only if envido hasn't already been resolved,
+ *   - only if truco hasn't been called (truco locks envido out).
  */
 export function canCallEnvido(
   currentTrick: number,
   trick1Player1Card: Card | null,
   trick1Player2Card: Card | null,
   envidoCalled: boolean,
-  currentBet: string,
+  _currentBet: string,
   trucoCalledThisRound: boolean,
-  gameState: string
+  gameState: string,
+  boardPlayerCard: Card | null = null,
+  boardAdversaryCard: Card | null = null,
 ): boolean {
   return (
-    gameState === 'playing' &&  // Only allow when game is active
+    gameState === 'playing' &&
     currentTrick === 0 &&
     !trick1Player1Card &&
     !trick1Player2Card &&
+    !boardPlayerCard &&
+    !boardAdversaryCard &&
     !envidoCalled &&
-    currentBet === 'none' &&
-    !trucoCalledThisRound  // Prevent Envido after Truco
+    !trucoCalledThisRound
   );
 }

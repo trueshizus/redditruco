@@ -9,6 +9,8 @@ interface PlayerSectionProps {
   // Action availability
   canCallEnvido: boolean;
   canCallTruco: boolean;
+  canCallRetruco: boolean;
+  canCallValeCuatro: boolean;
   canCallMazo: boolean;
 
   // Action handlers
@@ -18,6 +20,8 @@ interface PlayerSectionProps {
   onRealEnvido: () => void;
   onFaltaEnvido: () => void;
   onTruco: () => void;
+  onRetruco: () => void;
+  onValeCuatro: () => void;
   onMazo: () => void;
 }
 
@@ -28,6 +32,8 @@ export const PlayerSection = ({
   statusText,
   canCallEnvido,
   canCallTruco,
+  canCallRetruco,
+  canCallValeCuatro,
   canCallMazo,
   onCardSelect,
   onCardToggleFlip,
@@ -35,8 +41,23 @@ export const PlayerSection = ({
   onRealEnvido,
   onFaltaEnvido,
   onTruco,
-  onMazo
+  onRetruco,
+  onValeCuatro,
+  onMazo,
 }: PlayerSectionProps) => {
+  // Highest legal truco escalation right now (if any).
+  const trucoLabel = canCallValeCuatro
+    ? 'Vale 4'
+    : canCallRetruco
+    ? 'Retruco'
+    : 'Truco';
+  const trucoHandler = canCallValeCuatro
+    ? onValeCuatro
+    : canCallRetruco
+    ? onRetruco
+    : onTruco;
+  const trucoEnabled =
+    isPlayerTurn && (canCallTruco || canCallRetruco || canCallValeCuatro);
   return (
     <div className="h-full flex flex-col bg-gradient-to-t from-slate-900/95 to-slate-800/90 backdrop-blur-sm">
       
@@ -89,15 +110,15 @@ export const PlayerSection = ({
           {/* Primary Actions Row */}
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={onTruco}
-              disabled={!(isPlayerTurn && canCallTruco)}
+              onClick={trucoHandler}
+              disabled={!trucoEnabled}
               className={`py-4 px-4 rounded-xl text-base font-bold shadow-xl transition-all duration-200 transform ${
-                isPlayerTurn && canCallTruco
+                trucoEnabled
                   ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white hover:scale-105 active:scale-95 cursor-pointer'
                   : 'bg-gray-600/40 text-gray-400 cursor-not-allowed'
               }`}
             >
-              🎯 Truco
+              🎯 {trucoLabel}
             </button>
             <button
               onClick={onMazo}

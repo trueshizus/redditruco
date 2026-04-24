@@ -43,16 +43,19 @@ export const App = () => {
     state.context.envidoCalled,
     state.context.trucoState,
     state.context.trucoCalledThisRound,
-    state.context.gameState
+    state.context.gameState,
+    state.context.board.cardsInPlay.player,
+    state.context.board.cardsInPlay.adversary
   );
-  
-  const canCallTruco = state.context.gameState === 'playing' && 
-                      state.context.trucoState === 'none' &&
-                      state.context.roundStake === 1;
-  
-  const canCallMazo = state.context.gameState === 'playing';
 
-  // Check if players can respond to bets
+  const inPlaying = state.context.gameState === 'playing';
+  const holdingTruco = state.context.trucoHolder === state.context.currentTurn;
+
+  const canCallTruco = inPlaying && state.context.trucoState === 'none' && !state.context.awaitingResponse;
+  const canCallRetruco = inPlaying && state.context.trucoState === 'truco' && holdingTruco;
+  const canCallValeCuatro = inPlaying && state.context.trucoState === 'retruco' && holdingTruco;
+  const canCallMazo = inPlaying;
+
   const canRespond = state.context.awaitingResponse;
 
   // Determine player status text
@@ -187,6 +190,8 @@ export const App = () => {
             statusText={getPlayerStatusText()}
             canCallEnvido={canCallEnvidoValidation}
             canCallTruco={canCallTruco}
+            canCallRetruco={canCallRetruco}
+            canCallValeCuatro={canCallValeCuatro}
             canCallMazo={canCallMazo}
             onCardSelect={handleCardSelect}
             onCardToggleFlip={handleCardToggleFlip}
@@ -194,6 +199,8 @@ export const App = () => {
             onRealEnvido={handleRealEnvido}
             onFaltaEnvido={handleFaltaEnvido}
             onTruco={handleTruco}
+            onRetruco={handleRetruco}
+            onValeCuatro={handleValeCuatro}
             onMazo={handleMazo}
           />
         

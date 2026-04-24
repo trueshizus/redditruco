@@ -52,46 +52,49 @@ export interface GameContext {
   // Game identification
   seed: string;
   matchId: string;
-  
+
   // Deck and cards
   deck: Card[];
   discarded: Card[];
-  
+
   // Game log for spectators/debugging
   logs: string[];
-  
+
   // Board state
   board: Board;
-  
+
   // Players
   player: Player;
   adversary: Player;
-  
+
   // Game flow
   currentTurn: number; // 0 for player, 1 for adversary
-  mano: number; // Who starts (hand player)
-  dealer: number; // Who deals
-  
+  mano: number; // Leads the first trick this round
+  dealer: number; // Deals this round (pie)
+
   // Betting state
-  roundStake: number; // Points value of current round (1, 2, 3, or 4)
-  envidoStake: number; // Points at stake for envido
-  envidoCalled: boolean; // Whether envido has been called this round
-  trucoState: TrucoBet;
-  envidoState: EnvidoBet;
-  trucoCalledThisRound: boolean; // Track if Truco was called in this round
-  
+  roundStake: number; // Current truco stake (1, 2, 3, 4)
+  envidoStake: number; // Current envido stake being proposed
+  envidoAcceptedStake: number; // Envido implicitly accepted so far (refund value on NO_QUIERO)
+  envidoCalled: boolean; // Whether envido was already resolved this round
+  trucoState: TrucoBet; // Highest truco level the round is currently at
+  envidoState: EnvidoBet; // Latest envido level in the chain
+  trucoCalledThisRound: boolean; // Once truco enters a round, envido is locked out
+  trucoHolder: number | null; // Player who may raise truco next (accepter), null before first accept
+
   // Game state
   gameState: TrucoState;
-  betInitiator: number | null; // Who initiated current bet
+  betInitiator: number | null; // Who initiated the latest bet
   awaitingResponse: boolean; // Waiting for bet response
-  
+
   // Round completion
   tricks: [Trick, Trick, Trick]; // Three tricks per round
+  trickLeaders: [number | null, number | null, number | null]; // Player who led each trick
   roundWinner: number | null; // Who won the current round
-  gameWinner: number | null; // Who won the match (first to 30)
-  
+  gameWinner: number | null; // Who won the match (first to targetScore)
+
   // Game settings
-  targetScore: number; // Usually 30 points
+  targetScore: number;
 }
 
 // Events that can be sent to the state machine
