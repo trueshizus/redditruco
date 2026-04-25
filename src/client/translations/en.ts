@@ -75,4 +75,14 @@ export const en = {
     realEnvido: 'Real',
     faltaEnvido: 'Falta',
   },
+  chat: {
+    channelTitle: '#mesa-truco',
+    welcomePrompt: 'type /start to deal · /help for commands',
+    helpHeading: 'commands',
+    promptPrefix: 'vos@truco:#mesa $',
+    inputPlaceholder: 'type a command or banter…',
+    thinking: '<rival> está pensando…',
+    bot: { name: 'CanillitaBot' },
+    placeholders: { freeText: 'press / for commands' },
+  },
 };
