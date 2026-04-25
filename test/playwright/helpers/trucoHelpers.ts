@@ -108,3 +108,20 @@ export async function playCurrentTurnCard(page: Page, cardId: string): Promise<v
   const owner: Owner = s.context.currentTurn === 0 ? 'player' : 'opponent';
   await playCard(page, cardId, owner);
 }
+
+/** Type a command into the chat input and press Enter. */
+export async function chatSend(page: Page, text: string): Promise<void> {
+  const input = page.locator('[data-testid="chat-input"]');
+  await input.fill(text);
+  await input.press('Enter');
+}
+
+/** Read all chat messages currently rendered. */
+export async function chatMessages(page: Page): Promise<Array<{ kind: string; text: string }>> {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll('[data-testid="chat-message"]')).map((el) => ({
+      kind: el.getAttribute('data-kind') ?? '',
+      text: (el as HTMLElement).innerText,
+    })),
+  );
+}

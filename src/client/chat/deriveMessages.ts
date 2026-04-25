@@ -7,7 +7,12 @@ interface Snap {
     currentTurn: number;
     player: { hand: string[]; score: number; name: string };
     adversary: { hand: string[]; score: number; name: string };
-    board: { cardsInPlay: { player: string | null; adversary: string | null }; trickWinner: number | null };
+    board: {
+      currentTrick: number;
+      cardsInPlay: { player: string | null; adversary: string | null };
+      trickWinner: number | null;
+    };
+    tricks: Array<{ player1Card: string | null; player2Card: string | null; winner: number | null }>;
     trucoState: 'none' | 'truco' | 'retruco' | 'vale_cuatro';
     envidoState: 'none' | 'envido' | 'real_envido' | 'falta_envido';
     envidoStake: number;
@@ -78,6 +83,35 @@ export function deriveMessages(prev: Snap | null, curr: Snap, now: number): Chat
   }
 
   if (prevValue === 'playing' && curr.value === 'trick_complete') {
+    // XState may batch the final card-play and the transition into a single
+    // React update, so `cardsInPlay` can already be cleared by the time we
+    // see it. Fall back to the just-finished trick to emit any card-played
+    // message we would have missed above.
+    const finishedIdx = curr.context.board.currentTrick;
+    const finished = curr.context.tricks?.[finishedIdx];
+    if (finished) {
+      const alreadyLoggedP = prevP !== null || currP !== null;
+      const alreadyLoggedA = prevA !== null || currA !== null;
+      if (!alreadyLoggedP && finished.player1Card) {
+        out.push({
+          kind: 'card-played',
+          nick: 'vos',
+          cardId: finished.player1Card,
+          timestamp: now,
+          id: nextId(now),
+        });
+      }
+      if (!alreadyLoggedA && finished.player2Card) {
+        out.push({
+          kind: 'card-played',
+          nick: 'rival',
+          cardId: finished.player2Card,
+          timestamp: now,
+          id: nextId(now),
+        });
+      }
+    }
+
     const w = curr.context.board.trickWinner;
     if (w === null) out.push({ kind: 'result', flavor: 'draw', text: 'parda', timestamp: now, id: nextId(now) });
     else if (w === 0) out.push({ kind: 'result', flavor: 'win', text: 'ganaste la baza', timestamp: now, id: nextId(now) });
