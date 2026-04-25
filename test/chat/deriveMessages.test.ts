@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createActor } from 'xstate';
 import { trucoStateMachine } from '../../src/machines/truco';
 import { deriveMessages } from '../../src/client/chat/deriveMessages';
+import type { ChatMessage } from '../../src/client/chat/types';
 
 function snapshotsAfter(events: string[]) {
   const actor = createActor(trucoStateMachine);
@@ -17,7 +18,7 @@ function snapshotsAfter(events: string[]) {
 describe('deriveMessages', () => {
   it('emits topic + system messages on idle → playing transition', () => {
     const [prev, curr] = snapshotsAfter(['START_GAME']);
-    const msgs = deriveMessages(prev as never, curr as never, 1);
+    const msgs: ChatMessage[] = deriveMessages(prev as never, curr as never, 1);
     const kinds = msgs.map((m) => m.kind);
     expect(kinds).toContain('system');
     expect(msgs.some((m) => m.kind === 'system' && /empezó/.test(m.text))).toBe(true);
@@ -33,7 +34,7 @@ describe('deriveMessages', () => {
     const cardId = hand[0]!;
     actor.send({ type: 'PLAY_CARD', cardId });
     const after = actor.getSnapshot();
-    const msgs = deriveMessages(before as never, after as never, 1);
+    const msgs: ChatMessage[] = deriveMessages(before as never, after as never, 1);
     expect(msgs.some((m) => m.kind === 'card-played' && m.cardId === cardId)).toBe(true);
   });
 
@@ -44,7 +45,7 @@ describe('deriveMessages', () => {
     const before = actor.getSnapshot();
     actor.send({ type: 'CALL_TRUCO' });
     const after = actor.getSnapshot();
-    const msgs = deriveMessages(before as never, after as never, 1);
+    const msgs: ChatMessage[] = deriveMessages(before as never, after as never, 1);
     expect(msgs.some((m) => m.kind === 'bet-called' && m.bet === 'truco')).toBe(true);
   });
 });
