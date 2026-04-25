@@ -19,7 +19,7 @@ describe('decideBotEvent', () => {
     actor.send({ type: 'START_GAME' });
     const snap = actor.getSnapshot();
     if (snap.context.currentTurn === 1) {
-      const ev = decideBotEvent(snap);
+      const ev = decideBotEvent(snap as never);
       expect(ev?.type).toBe('PLAY_CARD');
       expect(typeof (ev as { cardId?: string }).cardId).toBe('string');
     }
