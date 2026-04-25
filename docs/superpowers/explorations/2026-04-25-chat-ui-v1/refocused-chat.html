@@ -1,0 +1,29 @@
+<h2>Refocused — chat UI for Truco</h2>
+<p class="subtitle">
+  Dropping the 5-variation exercise. Designing one thing: a stylized chat surface that
+  plays Truco. The game's state machine drives system messages and quick-reply chips;
+  the user can also type freely.
+</p>
+
+<div class="section">
+  <h3>What this becomes</h3>
+  <ul>
+    <li><strong>Background layer:</strong> the chat surface itself (theme, texture, room ambience).</li>
+    <li><strong>Controls layer:</strong> quick-reply chips + a free-text input. Both dispatch state-machine events.</li>
+    <li>Cards rendered inline (as message attachments? as glyph blocks? — to decide).</li>
+    <li>The "opponent" speaks too — their plays and calls land as messages from the other side.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Open design questions</h3>
+  <ul>
+    <li>Does the chat <em>replace</em> the current table UI, or ship as a togglable alternative?</li>
+    <li>Visual register: iMessage / WhatsApp / IRC-terminal / custom Argentine?</li>
+    <li>Single-player vs bot only for v1, or also online multiplayer?</li>
+    <li>How are cards rendered — inline thumbnails, an attached "hand panel", or text glyphs?</li>
+    <li>Free-text parsing: keyword/regex, or a small NLU layer?</li>
+  </ul>
+</div>
+
+<p class="subtitle">Continuing in terminal…</p>

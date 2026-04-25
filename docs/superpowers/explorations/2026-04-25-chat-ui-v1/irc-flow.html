@@ -1,0 +1,55 @@
+<h2>IRC chat — concrete flow</h2>
+<p class="subtitle">
+  A more developed mockup so we can pressure-test it. Channel topic at top, message
+  log in the middle, command-suggest bar above the input. Slash commands fire
+  state-machine events; free text is table-talk.
+</p>
+
+<div class="mockup">
+  <div class="mockup-header">#mesa-truco · 1v1 vs <code>rival_bot</code></div>
+  <div class="mockup-body" style="background:#0c0c0c;color:#d0d0c0;font-family:ui-monospace,'SF Mono',monospace;padding:0;height:520px;display:flex;flex-direction:column">
+
+    <!-- Channel topic strip -->
+    <div style="background:#1a1a1a;color:#a0a0a0;font-size:11px;padding:6px 12px;border-bottom:1px solid #1f1f1f;display:flex;justify-content:space-between">
+      <span><b style="color:#9aff8b">#mesa-truco</b> · <span style="color:#777">topic:</span> ronda 1 · mano: rival · puntos: <span style="color:#ffd166">vos 0 — rival 0</span></span>
+      <span style="color:#5a5a5a">/help</span>
+    </div>
+
+    <!-- Message log -->
+    <div style="flex:1;overflow:hidden;padding:8px 12px;font-size:12px;line-height:1.55;color:#bdbdb0">
+      <div style="color:#5a5a5a">[14:31:02] <span style="color:#7afff7">--- empezó la partida</span> ---</div>
+      <div style="color:#5a5a5a">[14:31:02] <span style="color:#7afff7">se repartieron 3 cartas</span></div>
+      <div style="color:#5a5a5a">[14:31:02] <span style="color:#7afff7">mano:</span> <span style="color:#ff9351">rival</span></div>
+      <div style="margin-top:6px"><span style="color:#5a5a5a">[14:31:14]</span> <span style="color:#ff9351">&lt;rival&gt;</span> tiró <span style="color:#ffd166">[7♥]</span></div>
+      <div><span style="color:#5a5a5a">[14:31:18]</span> <span style="color:#7afff7">&lt;vos&gt;</span> /play 1e</div>
+      <div style="color:#5a5a5a">[14:31:18] <span style="color:#7afff7">tiraste</span> <span style="color:#ffd166">[1♠]</span> · ganaste la baza</div>
+      <div style="margin-top:6px"><span style="color:#5a5a5a">[14:31:22]</span> <span style="color:#ff9351">&lt;rival&gt;</span> /truco</div>
+      <div style="color:#5a5a5a">[14:31:22] ⚡ <b style="color:#ff5470">truco</b> en juego · valor: 2</div>
+      <div style="color:#5a5a5a;font-style:italic;margin-top:4px">       respondé con: <span style="color:#9aff8b">/quiero</span> · <span style="color:#9aff8b">/noquiero</span> · <span style="color:#9aff8b">/quiero retruco</span></div>
+    </div>
+
+    <!-- Quick-reply chip strip -->
+    <div style="background:#101010;border-top:1px solid #1f1f1f;padding:6px 12px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="background:#1c2a1f;color:#9aff8b;padding:3px 9px;border-radius:2px;font-size:11px;border:1px solid #2a3f2f">/quiero</span>
+      <span style="background:#2a1f1f;color:#ff9080;padding:3px 9px;border-radius:2px;font-size:11px;border:1px solid #3f2a2a">/noquiero</span>
+      <span style="background:#2a2516;color:#ffd166;padding:3px 9px;border-radius:2px;font-size:11px;border:1px solid #3f3820">/quiero retruco</span>
+      <span style="background:#1a1a1a;color:#666;padding:3px 9px;border-radius:2px;font-size:11px;border:1px solid #2a2a2a;margin-left:auto">/mazo</span>
+    </div>
+
+    <!-- Input -->
+    <div style="background:#0c0c0c;border-top:1px solid #1f1f1f;padding:8px 12px;display:flex;align-items:center;font-size:12px">
+      <span style="color:#7afff7">vos@truco:#mesa</span><span style="color:#5a5a5a;margin-right:6px">$</span>
+      <span style="color:#fff">/quiero</span><span style="color:#9aff8b;animation:blink 1s steps(1) infinite;margin-left:1px">▮</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:18px">
+  <div class="label">Notes</div>
+  <ul>
+    <li><strong>Slash commands</strong> are first-class: <code>/play</code>, <code>/truco</code>, <code>/quiero</code>, <code>/envido</code>, <code>/mazo</code>, etc. Each maps 1:1 to a state-machine event.</li>
+    <li><strong>Quick-reply chips</strong> show the legal commands for the current state — they auto-fill the input on click.</li>
+    <li><strong>Free text</strong> falls through as table-talk: it's posted as <code>&lt;vos&gt;</code> messages but the machine ignores it.</li>
+    <li><strong>Cards as text glyphs</strong> by default: <code>[1♠] [7♥] [3♣]</code>. Could optionally render as small SVG inline — to decide.</li>
+  </ul>
+</div>

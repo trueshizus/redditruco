@@ -1,0 +1,72 @@
+<h2>Five candidate metaphors for the idle screen</h2>
+<p class="subtitle">
+  Each card is a different answer to "what is this app, really?" — the metaphor drives the
+  background dynamics, the controls expression, and the natural implementation medium.
+  Skim these, then answer in the terminal: keep this set, swap, or replace?
+</p>
+
+<div class="cards">
+  <div class="card" data-choice="m1" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0e0a;color:#9aff8b;font-family:ui-monospace,monospace;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:13px;line-height:1.4">
+      <div style="opacity:.6">user@truco:~$ </div>
+      <div>$ truco --new-game</div>
+      <div style="opacity:.7">▮ waiting for player 2…</div>
+    </div>
+    <div class="card-body">
+      <div class="label">M1</div>
+      <h3>Terminal hacker</h3>
+      <p>Unix prompt, scanlines, blinking cursor. Typed commands or numbered options. <strong>TUI</strong>.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m2" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:radial-gradient(circle at 50% 30%, #4a3a1f 0%, #1d1108 60%, #0e0703 100%);color:#e6c97a;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Georgia,serif;gap:4px">
+      <div style="font-size:32px;letter-spacing:.05em">TRUCO</div>
+      <div style="font-size:11px;opacity:.7;font-style:italic">una mesa, una vela</div>
+    </div>
+    <div class="card-body">
+      <div class="label">M2</div>
+      <h3>Pulpería</h3>
+      <p>Rural cantina by lamplight. Wood, brass, smoke. Cards feel physical. <strong>React webview</strong>.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m3" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;gap:6px">
+      <div style="background:#3a3a3c;color:#fff;padding:6px 10px;border-radius:14px 14px 14px 4px;font-size:11px;align-self:flex-start;max-width:75%">¿Jugamos un truco?</div>
+      <div style="background:#0a84ff;color:#fff;padding:6px 10px;border-radius:14px 14px 4px 14px;font-size:11px;align-self:flex-end;max-width:75%">dale</div>
+      <div style="background:#3a3a3c;color:#aaa;padding:4px 10px;border-radius:14px;font-size:9px;align-self:flex-start">escribiendo…</div>
+    </div>
+    <div class="card-body">
+      <div class="label">M3</div>
+      <h3>Chat con un amigo</h3>
+      <p>iMessage-style thread. Quick-reply chips. Typing indicators. <strong>Mobile / React</strong>.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m4" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#000;color:#ff3b3b;font-family:ui-monospace,monospace;display:flex;align-items:center;justify-content:center;flex-direction:column;text-shadow:0 0 8px currentColor;gap:4px">
+      <div style="font-size:9px;color:#fff;letter-spacing:.2em">HI-SCORE</div>
+      <div style="font-size:9px;color:#fff">001 .. 25,800</div>
+      <div style="font-size:18px;letter-spacing:.1em;animation:none;margin-top:8px">PRESS START</div>
+    </div>
+    <div class="card-body">
+      <div class="label">M4</div>
+      <h3>Arcade attract</h3>
+      <p>'80s coin-op. Pixel-art demo loop, marquee, hi-score table. <strong>Canvas + CRT shader</strong>.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m5" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0e3c4;color:#3a2a15;font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;gap:6px;flex-direction:column">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.2em;opacity:.6">Te invito a una</div>
+      <div style="font-size:22px;font-style:italic">Partida</div>
+      <div style="font-size:9px;opacity:.5;border-top:1px solid currentColor;padding-top:4px;align-self:stretch">— J.M.</div>
+    </div>
+    <div class="card-body">
+      <div class="label">M5</div>
+      <h3>Carta / invitación</h3>
+      <p>Paper letter received in the mail. Slow, quiet, ceremonial. <strong>Native-feel web</strong>.</p>
+    </div>
+  </div>
+</div>
