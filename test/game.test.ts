@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createActor, type Actor } from 'xstate';
-import { trucoStateMachine } from '../src/machines/truco';
+import { trucoStateMachine } from '../src/shared/truco';
 import {
   calculateEnvidoPoints,
   compareCards,
@@ -10,8 +10,8 @@ import {
   determineRoundWinner,
   getNextTrickLeader,
   resolveTrick,
-} from '../src/machines/truco';
-import type { Trick } from '../src/machines/truco';
+} from '../src/shared/truco';
+import type { Trick } from '../src/shared/truco';
 
 // ---------- Helpers ----------
 

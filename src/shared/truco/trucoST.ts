@@ -640,23 +640,32 @@ export const trucoStateMachine = createMachine({
     truco_betting: {
       entry: assign({ gameState: 'truco_betting' }),
       on: {
+        // Counter-raise from inside truco_betting: the responder (non-initiator
+        // in 1v1) escalates instead of answering. Flip betInitiator so the
+        // original caller is now the responder. Same pattern as envido interrupt.
         CALL_RETRUCO: {
           guard: ({ context }) => mayRaiseTruco(context, 'truco', context.currentTurn),
-          actions: assign(({ context }) => ({
-            trucoState: 'retruco' as TrucoBet,
-            roundStake: 3,
-            betInitiator: context.currentTurn,
-            logs: addLog(context, `${playerName(context, context.currentTurn)} raises to Retruco (3)`),
-          })),
+          actions: assign(({ context }) => {
+            const raiser = context.betInitiator === 0 ? 1 : 0;
+            return {
+              trucoState: 'retruco' as TrucoBet,
+              roundStake: 3,
+              betInitiator: raiser,
+              logs: addLog(context, `${playerName(context, raiser)} raises to Retruco (3)`),
+            };
+          }),
         },
         CALL_VALE_CUATRO: {
           guard: ({ context }) => mayRaiseTruco(context, 'retruco', context.currentTurn),
-          actions: assign(({ context }) => ({
-            trucoState: 'vale_cuatro' as TrucoBet,
-            roundStake: 4,
-            betInitiator: context.currentTurn,
-            logs: addLog(context, `${playerName(context, context.currentTurn)} raises to Vale Cuatro (4)`),
-          })),
+          actions: assign(({ context }) => {
+            const raiser = context.betInitiator === 0 ? 1 : 0;
+            return {
+              trucoState: 'vale_cuatro' as TrucoBet,
+              roundStake: 4,
+              betInitiator: raiser,
+              logs: addLog(context, `${playerName(context, raiser)} raises to Vale Cuatro (4)`),
+            };
+          }),
         },
 
         // Envido está primero — interrupt truco with an envido call.

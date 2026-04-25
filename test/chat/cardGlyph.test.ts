@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { formatCardGlyph, parseCardArg } from '../../src/client/chat/cardGlyph';
-import { generateFullDeck } from '../../src/machines/truco';
+import { generateFullDeck } from '../../src/shared/truco';
 
 describe('formatCardGlyph', () => {
   it('formats As de Espadas', () => {

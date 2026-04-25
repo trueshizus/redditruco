@@ -6,10 +6,11 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { ChatApp } from './ChatApp';
+import { MultiplayerApp } from './multiplayer';
 import { TranslationProvider } from './components/TranslationProvider';
 
 const ui = new URLSearchParams(window.location.search).get('ui');
-const Root = ui === 'chat' ? ChatApp : App;
+const Root = ui === 'multi' ? MultiplayerApp : ui === 'chat' ? ChatApp : App;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

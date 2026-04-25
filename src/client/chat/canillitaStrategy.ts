@@ -1,4 +1,4 @@
-import { compareCards, calculateEnvidoPoints, getCardRank } from '../../machines/truco';
+import { compareCards, calculateEnvidoPoints, getCardRank } from '../../shared/truco';
 
 export type EnvidoResponse = 'quiero' | 'no_quiero';
 export type TrucoResponse = 'quiero' | 'no_quiero' | 'retruco';

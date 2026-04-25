@@ -5,7 +5,7 @@ import { OpponentStatusBar } from './components/OpponentStatusBar';
 import { OpponentDebugPanel } from './components/OpponentDebugPanel';
 import { PlayerSection } from './components/PlayerSection';
 import { SlidingResponseOverlay } from './components/SlidingResponseOverlay';
-import { trucoStateMachine, canCallEnvido } from '../machines/truco';
+import { trucoStateMachine, canCallEnvido } from '../shared/truco';
 import { useTranslation } from './hooks/useTranslation';
 
 export const App = () => {

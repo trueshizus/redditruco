@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createActor } from 'xstate';
-import { trucoStateMachine } from '../../src/machines/truco';
+import { trucoStateMachine } from '../../src/shared/truco';
 import { deriveMessages } from '../../src/client/chat/deriveMessages';
 import type { ChatMessage } from '../../src/client/chat/types';
 

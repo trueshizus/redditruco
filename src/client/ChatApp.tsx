@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMachine } from '@xstate/react';
-import { trucoStateMachine } from '../machines/truco';
+import { trucoStateMachine } from '../shared/truco';
 import { ChatLayout } from './chat/ChatLayout';
 import { ChannelHeader } from './chat/ChannelHeader';
 import { MessageLog } from './chat/MessageLog';

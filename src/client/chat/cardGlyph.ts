@@ -1,4 +1,4 @@
-import { isValidCard } from '../../machines/truco';
+import { isValidCard } from '../../shared/truco';
 
 const SUIT_GLYPH: Record<string, string> = {
   E: '♠',
