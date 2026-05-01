@@ -14,6 +14,10 @@
     "entry": "index.cjs"
   },
   "media": {},
+  "permissions": {
+    "redis": true,
+    "realtime": true
+  },
   "menu": {
     "items": [
       {
